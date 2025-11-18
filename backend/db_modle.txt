@@ -9,7 +9,8 @@ CREATE TABLE users (
   email VARCHAR(120),
   address TEXT,
   password_hash VARCHAR(255),
-  profile_image_url VARCHAR(255)
+  profile_image_url VARCHAR(255),
+  profile_image_base64 TEXT,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
