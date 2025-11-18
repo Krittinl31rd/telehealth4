@@ -15,7 +15,6 @@ router.post(
 );
 router.post("/authface", thirdPartyController.AuthFace);
 router.post("/auth", thirdPartyController.Auth);
-router.post("/measurements", thirdPartyController.Measurements);
 router.post(
   "/register",
   upload.single("image"),
