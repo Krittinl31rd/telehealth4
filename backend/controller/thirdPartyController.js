@@ -2,7 +2,6 @@ const { createEmbedding, cosineSimilarity } = require("../helper/model_emb");
 const faceDB = require("../facedb.json");
 const { QueryTypes } = require("sequelize");
 const runQuery = require("../helper/queryHelper");
-g;
 
 exports.ConvertImg = async (req, res) => {
   try {
@@ -86,10 +85,8 @@ exports.AuthFace = async (req, res) => {
 
 exports.Auth = async (req, res) => {
   const { action, deviceID, type, xid } = req.body;
-  try {
-    const match = faceDB.find((item) => item.usernum == xid);
 
-    if (!match) return res.status(200).json({ retCode: 0 });
+  try {
     return res.status(200).json({
       retCode: 1,
       uinfo: {
@@ -109,23 +106,6 @@ exports.Auth = async (req, res) => {
       },
       msg: "success",
     });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({ message: "Internal Server Error" });
-  }
-};
-
-exports.Measurements = async (req, res) => {
-  const { datas } = req.body;
-
-  try {
-    await Promise.all(
-      datas.map((item) => {
-        console.log(item);
-      })
-    );
-
-    return res.status(200).json({ retCode: 1, msg: "success" });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Internal Server Error" });
