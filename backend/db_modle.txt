@@ -105,11 +105,8 @@ Flow การทำงาน Telehealth + Device
 
 
 --------------------- INITDATA ---------------------
-INSERT INTO `telehealth4`.`users`
-(`role`, `name`, `birthday`, `sex`, `address`) VALUES('patient', 'Krittin Klinhom', '2000-02-18', 1, 'Nakhonsawan');
-
 INSERT INTO `telehealth4`.`devices`
-(`device_id`,`location`) VALUES('G190166668888', 'Bangkok');
+(`device_id`,`location`) VALUES('G240416165614686', 'Bangkok');
 
 INSERT INTO `telehealth4`.`measurement_types`
 (`code`, `name`) VALUES('BMI', 'Height and weight results'),('BP', 'Blood pressure and heart rate results'),('BF', 'Body composition analysis'),
