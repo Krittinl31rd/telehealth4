@@ -1,5 +1,7 @@
 const { createEmbedding, cosineSimilarity } = require("../helper/model_emb");
 const faceDB = require("../facedb.json");
+const { QueryTypes } = require("sequelize");
+const runQuery = require("../helper/queryHelper");
 
 exports.ConvertImg = async (req, res) => {
   try {
