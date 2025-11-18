@@ -8,7 +8,7 @@ const { wss } = require("./server_ws");
 const app = express();
 app.use(cors());
 app.use(morgan("dev"));
-app.use(express.json());
+app.use(express.json({limit: "5mb"}));
 
 readdirSync("./routes/").map((c) => {
   app.use(require("./routes/" + c));

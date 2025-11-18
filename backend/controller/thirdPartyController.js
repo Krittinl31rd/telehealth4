@@ -1,8 +1,12 @@
 const { createEmbedding, cosineSimilarity } = require("../helper/model_emb");
-const faceDB = require("../facedb.json");
-const { QueryTypes } = require("sequelize");
-const runQuery = require("../helper/queryHelper");
+ const faceDB = require("../facedb.json");
 
+ 
+const { dbface } = require("../lowdb/lowdb");
+
+ 
+
+ 
 exports.ConvertImg = async (req, res) => {
   try {
     if (!req.file) {
@@ -33,9 +37,9 @@ exports.ConvertImg = async (req, res) => {
 
 exports.AuthFace = async (req, res) => {
   const { action, deviceID, content } = req.body;
-
   try {
-    let base64 = content.replace(/^data:image\/[a-zA-Z]+;?/, "");
+    let base64 = content;
+    // let base64 = content.replace(/^data:image\/[a-zA-Z]+;?/, "");
 
     // convert base64 to embedding
     const embedding = await createEmbedding(base64);
@@ -47,8 +51,8 @@ exports.AuthFace = async (req, res) => {
 
     let bestMatch = null;
     let bestSim = 0;
-
-    faceDB.forEach((item) => {
+    await dbface.read();
+    dbface.data.forEach((item) => {
       const sim = cosineSimilarity(embedding, item.face_emb);
       if (sim > bestSim) {
         bestSim = sim;
@@ -87,6 +91,12 @@ exports.Auth = async (req, res) => {
   const { action, deviceID, type, xid } = req.body;
 
   try {
+    const match = faceDB.find((item) => item.usernum == xid);
+    console.log(action);
+    console.log(deviceID);
+    console.log(type);
+    console.log(xid);
+    if (!match) return res.status(200).json({ retCode: 0 });
     return res.status(200).json({
       retCode: 1,
       uinfo: {
@@ -111,3 +121,5 @@ exports.Auth = async (req, res) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+
