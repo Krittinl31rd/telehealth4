@@ -1,0 +1,117 @@
+ตาราง users (เก็บข้อมูลผู้ป่วยและหมอ)
+CREATE TABLE users (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  role ENUM('patient', 'doctor', 'admin') NOT NULL,
+  name VARCHAR(120),
+  birthday DATE,
+  sex TINYINT, -- 1=male,2=female,0=unknown
+  phone VARCHAR(30),
+  email VARCHAR(120),
+  address TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ตาราง devices (อุปกรณ์ตรวจสุขภาพ)
+CREATE TABLE devices (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  device_id VARCHAR(100) UNIQUE, -- เช่น G190166668888
+  model VARCHAR(100),
+  location VARCHAR(255),
+  last_active TIMESTAMP NULL
+);
+
+ตาราง sessions (Telehealth session / นัดหมาย)
+ใช้ได้ทั้ง Video Call + ส่งผลตรวจสุขภาพประกอบ
+CREATE TABLE sessions (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  patient_id INT,
+  doctor_id INT,
+  start_time DATETIME,
+  end_time DATETIME,
+  status ENUM('scheduled','in_progress','completed','cancelled'),
+  notes TEXT,
+  FOREIGN KEY (patient_id) REFERENCES users(id),
+  FOREIGN KEY (doctor_id) REFERENCES users(id)
+);
+
+ตาราง measurements (1 record ต่อการวัด)
+จากเอกสาร: "action":"webResults" "datas":[...]
+CREATE TABLE measurements (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  device_id VARCHAR(100),
+  uid VARCHAR(100),             -- UID จากอุปกรณ์
+  patient_id INT NULL,          -- map UID กับ patient
+  occur_time BIGINT,            -- timestamp ของการวัด (ms)
+  raw_json LONGTEXT,            -- เก็บ raw JSON เพื่อกันข้อมูลหาย
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+ตาราง measurement_types (ชนิดของค่าที่วัด เช่น BP, BMI, ECG)
+CREATE TABLE measurement_types (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  code VARCHAR(20),  -- BP, BMI, BF, ECG
+  name VARCHAR(100)
+);
+
+ตาราง measurement_values (ค่าผลตรวจละเอียดแบบ key-value)
+รองรับข้อมูลจากทุก section เช่น BP → sbp/dbp, BMI → bmi, BF → fat %, ECG → hr, pr, etc.
+CREATE TABLE measurement_values (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  measurement_id BIGINT,
+  type_id INT,
+  field VARCHAR(100),
+  value VARCHAR(255),
+  normal_range VARCHAR(255),
+  FOREIGN KEY (measurement_id) REFERENCES measurements(id),
+  FOREIGN KEY (type_id) REFERENCES measurement_types(id)
+);
+
+ตาราง measurement_media (เก็บรูปและไฟล์ เช่น ECG base64)
+CREATE TABLE measurement_media (
+  id BIGINT AUTO_INCREMENT PRIMARY KEY,
+  measurement_id BIGINT,
+  media_type ENUM('ecg_image','face_image','other'),
+  base64 LONGTEXT,
+  FOREIGN KEY (measurement_id) REFERENCES measurements(id)
+);
+
+ตาราง diagnosis (ผลวิเคราะห์ของหมอ)
+CREATE TABLE diagnosis (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  session_id INT,
+  measurement_id BIGINT,
+  doctor_id INT,
+  summary TEXT,
+  recommendations TEXT,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (session_id) REFERENCES sessions(id),
+  FOREIGN KEY (doctor_id) REFERENCES users(id)
+);
+
+
+Flow การทำงาน Telehealth + Device
+1) คนไข้ทำการวัด → device ส่ง HTTP POST
+
+→ API /telehealth/device/ingest
+→ บันทึกลง measurements
+
+2) ระบบแยกค่าต่าง ๆ → บันทึกใน measurement_values
+3) ถ้ามีภาพ (ECG หรือรูปคนไข้) → บันทึกลง measurement_media
+4) หมอเปิด session Video Call → ดูผลตรวจย้อนหลัง
+5) หมอบันทึกผลวินิจฉัย → diagnosis
+
+
+
+--------------------- INITDATA ---------------------
+INSERT INTO `telehealth4`.`users`
+(`role`, `name`, `birthday`, `sex`, `address`) VALUES('patient', 'Krittin Klinhom', '2000-02-18', 1, 'Nakhonsawan');
+
+INSERT INTO `telehealth4`.`devices`
+(`device_id`,`location`) VALUES('G190166668888', 'Bangkok');
+
+INSERT INTO `telehealth4`.`measurement_types`
+(`code`, `name`) VALUES('BMI', 'Height and weight results'),('BP', 'Blood pressure and heart rate results'),('BF', 'Body composition analysis'),
+('temp', 'Thermometry'),('bo', 'Tblood oxygen'),('bs', 'Blood sugar'),('whr', 'Waist to hip ratio'),('ncg', 'Urinalysis'),
+('zytz', 'Traditional Chinese Medicine Constitution Identification'),('ecg', 'ECG analysis'),('xzsx', 'Four items of blood lipids'),('eye', 'Vision measurement'),
+('sds', 'Psychological Testing SDS'),('thxhdb', 'Glycated hemoglobin test'),('fei', 'Spirometry test'),('jiu', 'Alcohol content test'),('gmd', 'Bone density'),
+('com', 'Bone quality is average');
