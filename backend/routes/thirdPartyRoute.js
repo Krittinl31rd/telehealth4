@@ -15,6 +15,10 @@ router.post(
 );
 router.post("/authface", thirdPartyController.AuthFace);
 router.post("/auth", thirdPartyController.Auth);
+<<<<<<< Updated upstream
+=======
+router.post("/measurements", thirdPartyController.Measurements);
+>>>>>>> Stashed changes
 router.post(
   "/register",
   upload.single("image"),

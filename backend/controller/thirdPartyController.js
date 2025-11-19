@@ -1,5 +1,12 @@
 const { createEmbedding, cosineSimilarity } = require("../helper/model_emb");
+<<<<<<< Updated upstream
  const faceDB = require("../facedb.json");
+=======
+const { dbface } = require("../lowdb/lowdb");
+
+ 
+
+>>>>>>> Stashed changes
 
  
 const { dbface } = require("../lowdb/lowdb");
@@ -122,4 +129,24 @@ exports.Auth = async (req, res) => {
   }
 };
 
+<<<<<<< Updated upstream
 
+=======
+exports.Measurements = async (req, res) => {
+  const { datas } = req.body;
+  console.log(req.bo);
+  
+  try {
+    await Promise.all(
+      datas.map((item) => {
+        console.log(item);
+      })
+    );
+
+    return res.status(200).json({ retCode: 1, msg: "success" });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+>>>>>>> Stashed changes
