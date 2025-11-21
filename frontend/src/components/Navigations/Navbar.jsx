@@ -1,8 +1,9 @@
 import React from "react";
 import useAuthStore from "../../store/auth";
-// import { role } from "../../constant/enum";
+import { user_role } from "../../constant/enum";
 import { useNavigate } from "react-router-dom";
 import { LogOut, User2 } from "lucide-react";
+import userRoundImage from "../../assets/img/user-round.png";
 
 const Navbar = ({ toggleDrawer, toggleTheme, theme }) => {
   const { user, actionLogout } = useAuthStore();
@@ -32,10 +33,7 @@ const Navbar = ({ toggleDrawer, toggleTheme, theme }) => {
       </div>
       <div className="flex-1">
         <a
-          onClick={() =>
-            // navigate(user.role_id == role.admin ? "/admin" : "/user")
-            navigate("/user")
-          }
+          onClick={() => navigate("/")}
           className="btn btn-ghost text-xl font-bold text-primary"
         >
           {import.meta.env.VITE_NAME}
@@ -78,12 +76,20 @@ const Navbar = ({ toggleDrawer, toggleTheme, theme }) => {
               <div className="avatar">
                 <div className="w-8 h-8 rounded-full overflow-hidden">
                   <img
-                    src={user?.photo || "https://i.pravatar.cc/150"}
+                    src={
+                      user?.profile_image_url
+                        ? `${import.meta.env.VITE_API_URL}${
+                            user.profile_image_url
+                          }`
+                        : userRoundImage
+                    }
                     alt="profile"
+                    onError={(e) => {
+                      console.log(e);
+                      e.target.onerror = null;
+                      e.target.src = userRoundImage;
+                    }}
                     className="w-full h-full object-cover"
-                    // onError={(e) =>
-                    //   (e.target.src = "https://i.pravatar.cc/150")
-                    // }
                   />
                 </div>
               </div>

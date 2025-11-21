@@ -1,7 +1,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 
-const Sidebar = ({ toggleDrawer, menuItems }) => {
+const Sidebar = ({ toggleDrawer, menuItems = [] }) => {
   return (
     <div className="drawer-side">
       <label

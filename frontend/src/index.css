@@ -26,9 +26,9 @@
   --color-warning-content: oklch(17.834% 0.009 71.47);
   --color-error: oklch(73.092% 0.11 20.076);
   --color-error-content: oklch(14.618% 0.022 20.076);
-  --radius-selector: 1rem;
-  --radius-field: 0.5rem;
-  --radius-box: 1rem;
+  --radius-selector: 1.5rem;
+  --radius-field: 1rem;
+  --radius-box: 1.5rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;
@@ -41,7 +41,7 @@
   default: false;
   prefersdark: false;
   color-scheme: "dark";
-   --color-base-100: oklch(14% 0 0);
+  --color-base-100: oklch(14% 0 0);
   --color-base-200: oklch(20% 0 0);
   --color-base-300: oklch(26% 0 0);
   --color-base-content: oklch(97% 0 0);
@@ -61,9 +61,9 @@
   --color-warning-content: oklch(98% 0.016 73.684);
   --color-error: oklch(64% 0.246 16.439);
   --color-error-content: oklch(96% 0.015 12.422);
-   --radius-selector: 1rem;
-  --radius-field: 0.5rem;
-  --radius-box: 1rem;
+  --radius-selector: 1.5rem;
+  --radius-field: 1rem;
+  --radius-box: 1.5rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
   --border: 1px;

@@ -39,16 +39,17 @@ async function broadcastToLogInClients(message) {
 async function sendToClientID(id, message) {
   const msg = JSON.stringify(message);
   const client = wsClients.find((c) => c.user?.id == id);
-
-  if (client.isLogin && client.socket.readyState == WebSocket.OPEN) {
-    await new Promise((resolve, reject) => {
-      client.socket.send(msg, (err) => {
-        if (err) reject(err);
-        else resolve();
+  if (client) {
+    if (client.isLogin && client.socket.readyState == WebSocket.OPEN) {
+      await new Promise((resolve, reject) => {
+        client.socket.send(msg, (err) => {
+          if (err) reject(err);
+          else resolve();
+        });
       });
-    });
 
-    await new Promise((r) => setTimeout(r, 50));
+      await new Promise((r) => setTimeout(r, 50));
+    }
   }
 }
 

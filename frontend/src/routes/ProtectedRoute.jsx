@@ -18,20 +18,17 @@ const ProtectedRoute = ({
         .then((res) => {
           const currentUser = res?.data;
           if (!currentUser) return navigate("/");
-
           const platformRoleCheck =
             allowedPlatformRoles.length == 0 ||
-            allowedPlatformRoles.includes(currentUser.role_id);
+            allowedPlatformRoles.includes(currentUser.role);
 
           if (!platformRoleCheck) {
             return navigate("/unauthorized-platform");
           }
         })
         .catch((err) => {
-          if (err.response?.status == 403) {
-            actionLogout();
-            navigate("/");
-          }
+          actionLogout();
+          navigate("/");
         });
     } else {
       navigate("/");

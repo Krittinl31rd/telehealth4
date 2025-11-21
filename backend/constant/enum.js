@@ -40,4 +40,12 @@ const sectionList = [
   "com",
 ];
 
-module.exports = { measurement_types, sectionList };
+const user_role = { p: "patient", d: "doctor", a: "admin" };
+
+const ws_cmd = {
+  login: 1,
+
+  measurement_result: 10,
+};
+
+module.exports = { measurement_types, sectionList, user_role, ws_cmd };

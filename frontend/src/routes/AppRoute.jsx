@@ -1,26 +1,54 @@
 import React from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-// import ProtectedRoute from "./ProtectedRoute";
+import ProtectedRoute from "./ProtectedRoute";
 import NotFound from "../pages/error/NotFound";
 import UnauthPlatform from "../pages/error/UnauthPlatform";
-// import { role } from "../constant/enum";
+import { user_role } from "../constant/enum";
 import MainLayout from "../components/MainLayout";
 import Test from "../pages/test";
 import Login from "../pages/Login";
+import DashboardAdmin from "../pages/admin/Dashboard";
+import DashboardDoctor from "../pages/doctor/Dashboard";
+import DashboardPatient from "../pages/patient/Dashboard";
+import Measurement from "../pages/patient/Measurement";
 
 const router = createBrowserRouter([
   { path: "/", element: <Login /> },
 
   {
-    path: "/user",
+    path: "/admin",
     element: (
-      //   <ProtectedRoute allowedPlatformRoles={[role.admin]}>
-      <MainLayout />
-      //   </ProtectedRoute>
+      <ProtectedRoute allowedPlatformRoles={[user_role.a]}>
+        <MainLayout />
+      </ProtectedRoute>
     ),
     children: [
-      { index: true, element: <Test /> },
-      //   { path: "xxx", element: <div>55555</div> },
+      { index: true, element: <DashboardAdmin /> },
+      { path: "test", element: <Test /> },
+    ],
+  },
+  {
+    path: "/doctor",
+    element: (
+      <ProtectedRoute allowedPlatformRoles={[user_role.d]}>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <DashboardDoctor /> },
+      { path: "test", element: <Test /> },
+    ],
+  },
+  {
+    path: "/patient",
+    element: (
+      <ProtectedRoute allowedPlatformRoles={[user_role.p]}>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <DashboardPatient /> },
+      { path: "measurement_records", element: <Measurement /> },
     ],
   },
 

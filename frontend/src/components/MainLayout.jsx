@@ -4,16 +4,26 @@ import useAuthStore from "../store/auth";
 import Navbar from "./navigations/Navbar";
 import Sidebar from "./navigations/Sidebar";
 import useThemeStore from "../store/themeStore";
-// import { role } from "../constant/enum";
-import { getMenuItemsUser } from "../constant/menuItems";
+import { user_role } from "../constant/enum";
+import {
+  getMenuItemsAdmin,
+  getMenuItemsDoctor,
+  getMenuItemsPatient,
+} from "../constant/menuItems";
 
 const MainLayout = () => {
   const { user } = useAuthStore();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { theme, toggleTheme } = useThemeStore();
-  //   const menuItems =
-  //     user?.role_id == role.admin ? getMenuItemsAdmin() : getMenuItemsUser();
-  const menuItems = getMenuItemsUser();
+  const menuItems =
+    user?.role == user_role.a
+      ? getMenuItemsAdmin()
+      : user?.role == user_role.d
+      ? getMenuItemsDoctor()
+      : user?.role == user_role.p
+      ? getMenuItemsPatient()
+      : [];
+
   const toggleDrawer = () => setSidebarOpen(!sidebarOpen);
 
   return (
