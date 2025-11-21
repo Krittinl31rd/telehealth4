@@ -1,26 +1,40 @@
 import {
+  CalendarDays,
+  CalendarDaysIcon,
+  FolderPen,
   LayoutDashboard,
-  Sun,
-  Map,
-  NotepadText,
-  Atom,
-  Users2,
-  DoorClosed,
-  MoveUpRight,
-  ScrollText,
-  Settings2,
-  Building2,
-  SlidersVertical,
-  Microchip,
-  Goal,
 } from "lucide-react";
 
-export const getMenuItemsAdmin = () => [];
-
-export const getMenuItemsUser = () => [
+export const getMenuItemsAdmin = () => [
   {
-    path: `/test`,
-    label: "Test",
-    icon: <MoveUpRight />,
+    path: `/admin`,
+    label: "Dashboard",
+    icon: <LayoutDashboard />,
+  },
+];
+
+export const getMenuItemsDoctor = () => [
+  {
+    path: `/doctor`,
+    label: "Dashboard",
+    icon: <LayoutDashboard />,
+  },
+];
+
+export const getMenuItemsPatient = () => [
+  {
+    path: `/patient`,
+    label: "Dashboard",
+    icon: <LayoutDashboard />,
+  },
+  {
+    path: `/patient/appointments`,
+    label: "Appointments",
+    icon: <CalendarDays />,
+  },
+  {
+    path: `/patient/measurement_records`,
+    label: "Measurement Records",
+    icon: <FolderPen />,
   },
 ];
