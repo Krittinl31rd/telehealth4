@@ -33,10 +33,7 @@ const Modal2 = ({ open, onClose, title, children, width = "w-96", funct }) => {
 
         {/* Footer */}
         <div className="p-4 border-t border-base-300">
-          <button
-            className="btn btn-neutral btn-sm btn-block"
-            onClick={handleClose}
-          >
+          <button className="btn btn-neutral  btn-block" onClick={handleClose}>
             Exit
           </button>
         </div>

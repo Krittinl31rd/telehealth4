@@ -162,7 +162,7 @@ exports.ReadMeasurementsByTypeAndID = async (req, res) => {
         acc[row.id].values[row.field] = row.value;
         return acc;
       }, {})
-    );
+    ).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)); // DESC
 
     return res.status(200).json(grouped);
   } catch (err) {

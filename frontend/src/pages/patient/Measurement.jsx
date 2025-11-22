@@ -6,7 +6,12 @@ import {
   ReadMeasurementsByTypeAndID,
 } from "../../api/measurement";
 import Modal2 from "../../components/shared/Modal2";
-import ResultMeasurements from "../../components/patient/ResultMeasurements";
+import { measurement_types } from "../../constant/enum";
+import ResultBMI from "../../components/patient/ResultBMI";
+import ResultBP from "../../components/patient/ResultBP";
+import ResultBF from "../../components/patient/ResultBF";
+import ResultTemp from "../../components/patient/ResultTemp";
+import ResultBO from "../../components/patient/ResultBO";
 
 const images = import.meta.glob("../../assets/img/*.png", { eager: true });
 const gradients = [
@@ -89,8 +94,10 @@ const Measurement = () => {
       <h1 className="text-2xl font-bold mb-4">Select Measurement</h1>
 
       {loadingTypes ? (
-        <div className="text-center text-gray-500 py-20">
-          Loading measurement types...
+        <div className="text-center py-10">
+          <span className="loading loading-spinner   loading-lg"></span>
+          {/* <br /> */}
+          {/* Loading measurement types... */}
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -132,11 +139,40 @@ const Measurement = () => {
         width="w-4xl"
       >
         {loadingResults ? (
-          <div className="text-center py-10 text-gray-500">
-            Loading results...
+          <div className="text-center py-10">
+            <span className="loading loading-spinner   loading-lg"></span>
+            {/* <br />
+            Loading measurements... */}
           </div>
+        ) : resultMea.length == 0 ? (
+          <div className="text-center py-10">Not found data.</div>
         ) : (
-          <ResultMeasurements resultMea={resultMea} />
+          <div className="w-full space-y-2">
+            {/* <div className="flex items-center justify-end">
+              {selectedType.id == measurement_types.BP && "click"}
+            </div> */}
+            {resultMea.map((item, idx) => {
+              switch (item.type_id) {
+                case measurement_types.BMI:
+                  return <ResultBMI key={idx} data={item} />;
+
+                case measurement_types.BP:
+                  return <ResultBP key={idx} data={item} />;
+
+                case measurement_types.BF:
+                  return <ResultBF key={idx} data={item} />;
+
+                case measurement_types.temp:
+                  return <ResultTemp key={idx} data={item} />;
+
+                case measurement_types.bo:
+                  return <ResultBO key={idx} data={item} />;
+
+                default:
+                  return null;
+              }
+            })}
+          </div>
         )}
       </Modal2>
     </div>

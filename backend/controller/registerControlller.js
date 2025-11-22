@@ -104,7 +104,7 @@ exports.Login = async (req, res) => {
     }
 
     const [user] = await runQuery(
-      `SELECT id, id_card, name, email, password_hash, role, profile_image_url FROM users WHERE email = :email`,
+      `SELECT id, id_card, name, sex, email, password_hash, role, profile_image_url FROM users WHERE email = :email`,
       {
         email,
       },
@@ -122,6 +122,7 @@ exports.Login = async (req, res) => {
       id: user.id,
       id_card: user.id_card,
       name: user.name,
+      sex: user.sex,
       email: user.email,
       password_hash: user.password_hash,
       role: user.role,
@@ -148,7 +149,7 @@ exports.AuthMe = async (req, res) => {
     const userId = req.authUser.id;
 
     const [user] = await runQuery(
-      `SELECT id, id_card, name, email, password_hash, role, profile_image_url FROM users WHERE id = :userId`,
+      `SELECT id, id_card, name, sex, email, password_hash, role, profile_image_url FROM users WHERE id = :userId`,
       { userId },
       QueryTypes.SELECT
     );
@@ -159,6 +160,7 @@ exports.AuthMe = async (req, res) => {
       id: user.id,
       id_card: user.id_card,
       name: user.name,
+      sex: user.sex,
       email: user.email,
       password_hash: user.password_hash,
       role: user.role,
