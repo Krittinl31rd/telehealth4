@@ -6,7 +6,7 @@ const path = require("path");
 const { dbface } = require("../lowdb/lowdb");
 const { createEmbedding } = require("../helper/model_emb");
 const jwt = require("jsonwebtoken");
-
+const { updateUser, calculateAge } = require("../helper/update_user");
 exports.Register = async (req, res) => {
   const { email, name, password, birthday, sex, phone, address, id_card } =
     req.body;
@@ -172,36 +172,77 @@ exports.AuthMe = async (req, res) => {
   }
 };
 
-function calculateAge(birthdayStr) {
-  // Expecting birthdayStr like "12-31-1990"
-  const [year, month, day] = birthdayStr.split("-").map(Number);
-  const birthDate = new Date(year, month - 1, day); // month is 0-indexed
-  const today = new Date();
-
-  let age = today.getFullYear() - birthDate.getFullYear();
-
-  // Adjust if birthday hasn't occurred yet this year
-  const m = today.getMonth() - birthDate.getMonth();
-  const d = today.getDate() - birthDate.getDate();
-  if (m < 0 || (m === 0 && d < 0)) {
-    age--;
-  }
-
-  return age;
-}
-
-
 exports.UpdateProfile = async (req, res) => {
   try {
     const userId = req.authUser.id;
-    console.log(req.body);
-    
-     
-    res.status(200).json({
-        
+    console.log(userId);
+
+    const { email, gender, address, name, birthday } = req.body;
+
+    let profileImageUrl = null;
+    let profileBase64 = null;
+    let authenImageUrl = null;
+    let authenBase64 = null;
+    let authenFace_emb = null;
+
+    const imageDir = path.join(process.cwd(), "img/profile");
+    if (!fs.existsSync(imageDir)) {
+      fs.mkdirSync(imageDir, { recursive: true });
+    }
+
+    if (req.files && req.files.image1) {
+      const file1 = req.files.image1[0]; // multer gives array
+
+      const fileName1 = `profile-${Date.now()}${path.extname(
+        file1.originalname
+      )}`;
+      const filePath1 = path.join(imageDir, fileName1);
+
+      fs.writeFileSync(filePath1, file1.buffer);
+      profileBase64 = file1.buffer.toString("base64");
+      profileImageUrl = `/img/profile/${fileName1}`;
+    }
+
+    if (req.files && req.files.image2) {
+      const file2 = req.files.image2[0];
+
+      const fileName2 = `authen-${Date.now()}${path.extname(
+        file2.originalname
+      )}`;
+      const filePath2 = path.join(imageDir, fileName2);
+
+      fs.writeFileSync(filePath2, file2.buffer);
+      authenBase64 = file2.buffer.toString("base64");
+      authenImageUrl = `/img/auth/${fileName2}`;
+      authenFace_emb = await createEmbedding(authenBase64);
+    }
+
+    await runQuery(
+      `UPDATE users
+       SET email = :email, sex = :gender, address = :address, name = :name, birthday =:birthday, auth_image_url =:authenImageUrl 
+       WHERE id = :userId;`,
+      { email, gender, address, name, birthday, authenImageUrl, userId },
+      QueryTypes.UPDATE
+    );
+
+    if (req.files && req.files.image2) {
+      await updateUser(userId, {
+        name: name,
+        sex: gender.toString(),
+        age: calculateAge(birthday).toString(),
+        address: address,
+        remark: "",
+        face_emb: authenFace_emb,
+      });
+    }
+
+    return res.status(200).json({
+      message: "Profile updated successfully",
+      image1: profileImageUrl,
+      image2: authenImageUrl,
     });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
