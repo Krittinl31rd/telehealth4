@@ -8,6 +8,7 @@ const {
   Register,
   Login,
   AuthMe,
+  UpdateProfile
 } = require("../controller/registerControlller");
 const path = require("path");
 const { authenticate } = require("../middleware/authenticate");
@@ -23,6 +24,7 @@ router.post("/auth", thirdPartyController.Auth);
 
 router.post("/login", Login);
 router.get("/authme", authenticate, AuthMe);
+router.post("/updateprofile", authenticate, UpdateProfile);
 router.post("/register", upload.single("image"), Register);
 
 module.exports = router;

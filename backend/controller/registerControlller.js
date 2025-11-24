@@ -189,3 +189,19 @@ function calculateAge(birthdayStr) {
 
   return age;
 }
+
+
+exports.UpdateProfile = async (req, res) => {
+  try {
+    const userId = req.authUser.id;
+    console.log(req.body);
+    
+     
+    res.status(200).json({
+        
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};

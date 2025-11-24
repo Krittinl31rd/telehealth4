@@ -11,6 +11,7 @@ import DashboardAdmin from "../pages/admin/Dashboard";
 import DashboardDoctor from "../pages/doctor/Dashboard";
 import DashboardPatient from "../pages/patient/Dashboard";
 import Measurement from "../pages/patient/Measurement";
+import Profile from "../pages/Profile";
 
 const router = createBrowserRouter([
   { path: "/", element: <Login /> },
@@ -24,6 +25,18 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <DashboardAdmin /> },
+      { path: "test", element: <Test /> },
+    ],
+  },
+   {
+    path: "/profile",
+    element: (
+      <ProtectedRoute allowedPlatformRoles={[user_role.a,user_role.d,user_role.p]}>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <Profile /> },
       { path: "test", element: <Test /> },
     ],
   },
