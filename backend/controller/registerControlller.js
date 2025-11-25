@@ -25,12 +25,12 @@ exports.Register = async (req, res) => {
       });
     }
 
+    let authenImageUrl = null;
     let base64 = null;
-    let profileImageUrl = null;
     let face_emb = null;
 
     if (req.file) {
-      const imageDir = path.join(process.cwd(), "img/profile");
+      const imageDir = path.join(process.cwd(), "img/auth");
       if (!fs.existsSync(imageDir)) fs.mkdirSync(imageDir, { recursive: true });
 
       const fileName = `${Date.now()}.jpg`;
@@ -38,7 +38,7 @@ exports.Register = async (req, res) => {
 
       fs.writeFileSync(filePath, req.file.buffer);
       base64 = req.file.buffer.toString("base64");
-      profileImageUrl = `/img/profile/${fileName}`;
+      authenImageUrl = `/img/auth/${fileName}`;
       face_emb = await createEmbedding(base64);
     }
 
@@ -49,9 +49,9 @@ exports.Register = async (req, res) => {
     const req_user = await runQuery(
       `
       INSERT INTO users 
-      (email, name, password_hash, birthday, sex, phone, address, id_card, profile_image_url, profile_image_base64, created_at)
+      (email, name, password_hash, birthday, sex, phone, address, id_card, auth_image_url  created_at)
       VALUES 
-      (:email, :name, :password_hash, :birthday, :sex, :phone, :address, :id_card, :image_url, :base64, NOW())
+      (:email, :name, :password_hash, :birthday, :sex, :phone, :address, :id_card, :image_url, NOW())
       `,
       {
         email,
@@ -62,8 +62,8 @@ exports.Register = async (req, res) => {
         phone,
         address,
         id_card,
-        image_url: profileImageUrl,
-        base64: base64,
+        image_url: authenImageUrl,
+         
       },
       QueryTypes.INSERT
     );
