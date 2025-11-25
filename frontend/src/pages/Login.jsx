@@ -5,13 +5,14 @@ import axios from "axios";
 import { toast } from "sonner";
 import { user_role, user_sex } from "../constant/enum";
 import loginImage from "../assets/img/login_img.png";
+import { Upload, User } from "lucide-react";
 
 const Login = () => {
   const { token, user, actionLogin } = useAuthStore();
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState(1);
+  const [step, setStep] = useState(3);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -19,6 +20,8 @@ const Login = () => {
     gender: "",
     password: "",
     passwordConfirm: "",
+    profile_image_url: "",
+    id_card: "",
   });
   const [passwordError, setPasswordError] = useState("");
 
@@ -30,6 +33,8 @@ const Login = () => {
       gender: "",
       password: "",
       passwordConfirm: "",
+      profile_image_url: "",
+      id_card: "",
     });
   };
 
@@ -72,48 +77,62 @@ const Login = () => {
       }
     } catch (err) {
       const msg = err.response?.data?.message;
-      toast.error(msg + ", Please Registration");
-      setForm({ ...form, password: "" });
-      setStep(3);
+      const status = err.response?.data?.status;
+      if (status) {
+        toast.error(msg + ", Please Registration");
+        setForm({ ...form, password: "" });
+        setStep(3);
+      }
+      toast.error(msg);
     }
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    // check ""
-    for (const [field, value] of Object.entries(form)) {
-      if (value.trim() == "") {
-        return toast.warning(`${field} is required.`);
+    if (step == 3) {
+      for (const [field, value] of Object.entries(form)) {
+        if (["profile_image_url", "id_card"].includes(field)) continue;
+        if (!value || value.toString().trim() == "") {
+          return toast.warning(`${field} is required.`);
+        }
       }
+      if (form.password != form.passwordConfirm) {
+        return toast.warning("Password and confirm password do not match.");
+      }
+
+      setStep(4);
+      return;
     }
 
-    // check email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(form.email)) {
-      return toast.warning("Email format is invalid.");
+    if (!form.profile_image_url || !form.id_card) {
+      return toast.warning("Please upload profile image and ID card.");
     }
-
-    // check pass
-    if (form.password != form.passwordConfirm) {
-      return toast.warning("Password and confirm password do not match.");
-    }
-
-    const payload = {
-      role: user_role.p,
-      name: form.name,
-      birthday: form.date,
-      sex: Number(form.gender),
-      email: form.email,
-      password: form.password,
-    };
 
     try {
-      console.log("Registering with:", payload);
+      const payload = new FormData();
+      payload.append("role", user_role.p);
+      payload.append("name", form.name);
+      payload.append("birthday", form.date);
+      payload.append("sex", Number(form.gender));
+      payload.append("email", form.email);
+      payload.append("password", form.password);
+      payload.append("profile_image_url", form.profile_image_url);
+      payload.append("id_card", form.id_card);
+
+      console.log(form);
+      // const res = await axios.post(
+      //   `${import.meta.env.VITE_API_URL}/register`,
+      //   payload,
+      //   { headers: { "Content-Type": "multipart/form-data" } }
+      // );
+
+      // toast.success(res.data.message);
+      // clearForm();
+      // setStep(1);
     } catch (err) {
       console.error(err);
-      const msg = err.response?.data?.message;
-      toast.error(msg || "Registration failed.");
+      toast.error(err.response?.data?.message || "Registration failed.");
     }
   };
 
@@ -151,6 +170,12 @@ const Login = () => {
     }
   }, [token, user]);
 
+  useEffect(() => {
+    if (step == 1) {
+      setForm({ ...form, password: "" });
+    }
+  }, [step]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-base to-base-100 flex items-center justify-center p-4">
       <div className="card card-side bg-base-100 shadow-xl max-w-3xl ">
@@ -183,6 +208,16 @@ const Login = () => {
               </button>
             </div>
           )}
+          {step == 4 && (
+            <div className="mb-0">
+              <button
+                onClick={() => setStep(3)}
+                className="btn btn-link btn-neutral p-0"
+              >
+                {"<"} Back
+              </button>
+            </div>
+          )}
 
           {(step == 1 || step == 2) && (
             <h2 className="text-2xl font-bold text-center mb-6 text-base-content">
@@ -190,7 +225,7 @@ const Login = () => {
             </h2>
           )}
 
-          {step == 3 && (
+          {(step == 3 || step == 4) && (
             <h2 className="text-2xl font-bold text-left mb-0 text-base-content">
               Registration
             </h2>
@@ -393,6 +428,72 @@ const Login = () => {
                 className="btn btn-block bg-black text-white btn-lg"
               >
                 Continue
+              </button>
+            </>
+          )}
+
+          {step == 4 && (
+            <>
+              <div className="flex flex-col items-center gap-2 relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  id="profileUpload"
+                  onChange={(e) =>
+                    setForm({ ...form, profile_image_url: e.target.files[0] })
+                  }
+                />
+
+                <button
+                  onClick={() =>
+                    document.getElementById("profileUpload").click()
+                  }
+                  className="btn btn-neutral btn-sm shadow-xl absolute z-50 bottom-[20%] right-[20%] sm:bottom-[20%] sm:right-[30%]"
+                >
+                  <Upload className="w-4 h-4" />
+                </button>
+
+                <div className="relative w-40 h-40 rounded-full overflow-hidden border-2 border-base-300 border-dashed flex items-center justify-center bg-base-200 ">
+                  {form.profile_image_url ? (
+                    <img
+                      src={URL.createObjectURL(form.profile_image_url)}
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User className="w-12 h-12 text-gray-400" />
+                  )}
+                </div>
+                <p className="font-semibold">
+                  Click to Upload Image for Authentication
+                </p>
+              </div>
+
+              <div>
+                <label htmlFor="id_card" className="label mb-1">
+                  <span className="label-text font-bold text-base-content">
+                    ID Card
+                  </span>
+                </label>
+                <input
+                  id="id_card"
+                  type="text"
+                  placeholder="ID Card"
+                  className="input  input-neutral input-lg w-full "
+                  value={form.id_card}
+                  onChange={(e) =>
+                    setForm({ ...form, id_card: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              <button
+                onClick={handleRegister}
+                className="btn btn-block bg-black text-white btn-lg mt-4"
+              >
+                Registration
               </button>
             </>
           )}

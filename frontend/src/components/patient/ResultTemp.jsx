@@ -9,7 +9,6 @@ const getTempCategory = (temp) => {
     return { category: "Normal", color: "text-green-500" };
   if (t >= 37.9) return { category: "Fever", color: "text-red-500" };
 
-  // fallback
   return { category: "Unknown", color: "text-gray-500" };
 };
 

@@ -115,7 +115,7 @@ exports.MeasurementsTypes = async (req, res) => {
   try {
     const result = await runQuery(
       `SELECT * FROM measurement_types WHERE code NOT IN (:code)`,
-      { code: ["zytz", "sds", "fei", "gmd", "com"] },
+      { code: ["zytz", "sds", "fei", "gmd", "com", "jiu"] },
       QueryTypes.SELECT
     );
 

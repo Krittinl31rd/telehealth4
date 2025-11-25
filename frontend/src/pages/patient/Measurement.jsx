@@ -12,22 +12,29 @@ import ResultBP from "../../components/patient/ResultBP";
 import ResultBF from "../../components/patient/ResultBF";
 import ResultTemp from "../../components/patient/ResultTemp";
 import ResultBO from "../../components/patient/ResultBO";
+import ResultBS from "../../components/patient/ResultBS";
+import ResultWHR from "../../components/patient/ResultWHR";
+import ResultNCG from "../../components/patient/ResultNCG";
+import ResultECG from "../../components/patient/ResultECG";
+import ResultXZSX from "../../components/patient/ResultXZSX";
+import ResultEYE from "../../components/patient/ResultEYE";
+import ResultTHXHDB from "../../components/patient/ResultTHXHDB";
+import LoadinPacMan from "../../components/shared/LoadinPacMan";
 
 const images = import.meta.glob("../../assets/img/*.png", { eager: true });
 const gradients = [
-  "from-sky-400 to-blue-600",
-  "from-cyan-400 to-teal-600",
-  "from-blue-300 to-indigo-600",
-  "from-indigo-400 to-purple-600",
-  "from-violet-400 to-fuchsia-600",
-  "from-emerald-400 to-green-600",
-  "from-teal-300 to-emerald-600",
-  "from-rose-300 to-rose-600",
-  "from-amber-300 to-orange-600",
-  "from-yellow-300 to-amber-500",
-  "from-slate-400 to-slate-600",
-  "from-zinc-300 to-zinc-600",
-  "from-pink-300 to-pink-600",
+  "from-blue-400 to-blue-600",
+  "from-orange-400 to-orange-600",
+  "from-red-400 to-red-600",
+  "from-indigo-400 to-violet-600",
+  "from-amber-400 to-amber-600",
+  "from-sky-400 to-sky-600",
+  "from-cyan-400 to-cyan-600",
+  "from-rose-400 to-rose-600",
+  "from-green-400 to-green-600",
+  "from-yellow-400 to-yellow-600",
+  "from-teal-300 to-teal-600",
+  "from-violet-400 to-violet-600",
 ];
 
 const Measurement = () => {
@@ -100,7 +107,7 @@ const Measurement = () => {
           {/* Loading measurement types... */}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
           {meaTypes.map((item, idx) => {
             const imgSrc = images[`../../assets/img/${item.code}.png`]?.default;
 
@@ -116,7 +123,7 @@ const Measurement = () => {
                   hover:scale-105 hover:shadow-2xl hover:brightness-110 cursor-pointer
                 `}
               >
-                <div className="w-16 h-16 flex items-center justify-center bg-white/20 rounded-xl mb-3 shadow-inner">
+                <div className="w-16 h-16 flex items-center justify-center bg-white/80 rounded-xl mb-2 shadow-inner">
                   <img
                     src={imgSrc}
                     alt={item?.name}
@@ -140,7 +147,8 @@ const Measurement = () => {
       >
         {loadingResults ? (
           <div className="text-center py-10">
-            <span className="loading loading-spinner   loading-lg"></span>
+            <LoadinPacMan />
+            {/* <span className="loading loading-spinner   loading-lg"></span> */}
             {/* <br />
             Loading measurements... */}
           </div>
@@ -167,6 +175,27 @@ const Measurement = () => {
 
                 case measurement_types.bo:
                   return <ResultBO key={idx} data={item} />;
+
+                case measurement_types.bs:
+                  return <ResultBS key={idx} data={item} />;
+
+                case measurement_types.whr:
+                  return <ResultWHR key={idx} data={item} />;
+
+                case measurement_types.ncg:
+                  return <ResultNCG key={idx} data={item} />;
+
+                case measurement_types.ecg:
+                  return <ResultECG key={idx} data={item} />;
+
+                case measurement_types.xzsx:
+                  return <ResultXZSX key={idx} data={item} />;
+
+                case measurement_types.eye:
+                  return <ResultEYE key={idx} data={item} />;
+
+                case measurement_types.thxhdb:
+                  return <ResultTHXHDB key={idx} data={item} />;
 
                 default:
                   return null;
