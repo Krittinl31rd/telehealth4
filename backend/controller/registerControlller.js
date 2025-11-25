@@ -9,8 +9,7 @@ const jwt = require("jsonwebtoken");
 const { updateUser, calculateAge } = require("../helper/update_user");
 
 exports.Register = async (req, res) => {
-  const { email, name, password, birthday, sex, phone, address, id_card } =
-    req.body;
+  const { email, name, password, birthday, sex, id_card } = req.body;
 
   try {
     const [user] = await runQuery(
@@ -49,9 +48,9 @@ exports.Register = async (req, res) => {
     const req_user = await runQuery(
       `
       INSERT INTO users 
-      (email, name, password_hash, birthday, sex, phone, address, id_card, auth_image_url  created_at)
+      (email, name, password_hash, birthday, sex, id_card, auth_image_url,  created_at)
       VALUES 
-      (:email, :name, :password_hash, :birthday, :sex, :phone, :address, :id_card, :image_url, NOW())
+      (:email, :name, :password_hash, :birthday, :sex,  :id_card, :image_url, NOW())
       `,
       {
         email,
@@ -59,11 +58,8 @@ exports.Register = async (req, res) => {
         password_hash: hashedPassword,
         birthday,
         sex,
-        phone,
-        address,
         id_card,
         image_url: authenImageUrl,
-         
       },
       QueryTypes.INSERT
     );
@@ -76,7 +72,7 @@ exports.Register = async (req, res) => {
       name,
       sex: sex.toString(),
       age: calculateAge(birthday).toString(), // replace with actual age if available
-      address,
+      address: "",
       remark: "",
       face_emb: face_emb,
     });
@@ -85,14 +81,11 @@ exports.Register = async (req, res) => {
 
     return res.status(200).json({
       message: "Register success",
-      email,
-      profile_image: profileImageUrl,
     });
   } catch (err) {
     console.error(err);
     return res.status(500).json({
       message: "Register failed",
-      error: err.message,
     });
   }
 };

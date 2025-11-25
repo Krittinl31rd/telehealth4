@@ -2,7 +2,7 @@ import React from "react";
 import useAuthStore from "../../store/auth";
 import { user_role } from "../../constant/enum";
 import { useNavigate } from "react-router-dom";
-import { LogOut, User2 } from "lucide-react";
+import { LogOut, User, User2 } from "lucide-react";
 import userRoundImage from "../../assets/img/user-round.png";
 
 const Navbar = ({ toggleDrawer, toggleTheme, theme }) => {
@@ -74,23 +74,18 @@ const Navbar = ({ toggleDrawer, toggleTheme, theme }) => {
           <div className="dropdown dropdown-end">
             <div tabIndex={0} role="button" className="cursor-pointer">
               <div className="avatar">
-                <div className="w-8 h-8 rounded-full overflow-hidden">
-                  <img
-                    src={
-                      user?.profile_image_url
-                        ? `${import.meta.env.VITE_API_URL}${
-                            user.profile_image_url
-                          }`
-                        : userRoundImage
-                    }
-                    alt="profile"
-                    onError={(e) => {
-                      console.log(e);
-                      e.target.onerror = null;
-                      e.target.src = userRoundImage;
-                    }}
-                    className="w-full h-full object-cover"
-                  />
+                <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center border-2 border-base-300">
+                  {user?.profile_image_url ? (
+                    <img
+                      src={`${import.meta.env.VITE_API_URL}${
+                        user.profile_image_url
+                      }`}
+                      alt="profile"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <User className="w-8 h-8 text-gray-400" />
+                  )}
                 </div>
               </div>
             </div>

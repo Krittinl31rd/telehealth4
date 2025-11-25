@@ -117,10 +117,8 @@ const Profile = () => {
   return (
     <div className="w-full min-h-screen p-2 sm:p-4 bg-base-200 overflow-auto">
       {loadingTypes ? (
-        <div className="text-center py-10">
-          <span className="loading loading-spinner   loading-lg"></span>
-          {/* <br /> */}
-          {/* Loading measurement types... */}
+        <div className="fixed inset-0 flex items-center justify-center bg-base-100/70 z-50">
+          <span className="loading loading-spinner loading-lg text-primary"></span>
         </div>
       ) : (
         <div className="max-w-7xl mx-auto rounded-lg bg-base-100 p-3 sm:p-6">

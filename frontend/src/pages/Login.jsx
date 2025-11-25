@@ -6,13 +6,14 @@ import { toast } from "sonner";
 import { user_role, user_sex } from "../constant/enum";
 import loginImage from "../assets/img/login_img.png";
 import { Upload, User } from "lucide-react";
+import { Register } from "../api/auth";
 
 const Login = () => {
   const { token, user, actionLogin } = useAuthStore();
   const navigate = useNavigate();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [step, setStep] = useState(3);
+  const [step, setStep] = useState(1);
   const [form, setForm] = useState({
     name: "",
     email: "",
@@ -82,8 +83,9 @@ const Login = () => {
         toast.error(msg + ", Please Registration");
         setForm({ ...form, password: "" });
         setStep(3);
+      } else {
+        toast.error(msg);
       }
-      toast.error(msg);
     }
   };
 
@@ -109,6 +111,7 @@ const Login = () => {
       return toast.warning("Please upload profile image and ID card.");
     }
 
+    setIsLoading(true);
     try {
       const payload = new FormData();
       payload.append("role", user_role.p);
@@ -117,22 +120,18 @@ const Login = () => {
       payload.append("sex", Number(form.gender));
       payload.append("email", form.email);
       payload.append("password", form.password);
-      payload.append("profile_image_url", form.profile_image_url);
+      payload.append("image", form.profile_image_url);
       payload.append("id_card", form.id_card);
 
-      console.log(form);
-      // const res = await axios.post(
-      //   `${import.meta.env.VITE_API_URL}/register`,
-      //   payload,
-      //   { headers: { "Content-Type": "multipart/form-data" } }
-      // );
-
-      // toast.success(res.data.message);
-      // clearForm();
-      // setStep(1);
+      const resp = await Register(token, payload);
+      toast.success(resp.data.message);
+      clearForm();
+      setStep(1);
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.message || "Registration failed.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -499,6 +498,12 @@ const Login = () => {
           )}
         </div>
       </div>
+
+      {isLoading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-base-100/70 z-50">
+          <span className="loading loading-spinner loading-lg text-primary"></span>
+        </div>
+      )}
     </div>
   );
 };
