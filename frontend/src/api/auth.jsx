@@ -6,3 +6,10 @@ export const Current = async (token) =>
       Authorization: `Bearer ${token}`,
     },
   });
+  
+export const UpdateProfile = async (token,form) =>
+  await axios.post(import.meta.env.VITE_API_URL + "/updateprofile", form, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });

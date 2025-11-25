@@ -7,6 +7,7 @@ const { dbface } = require("../lowdb/lowdb");
 const { createEmbedding } = require("../helper/model_emb");
 const jwt = require("jsonwebtoken");
 const { updateUser, calculateAge } = require("../helper/update_user");
+
 exports.Register = async (req, res) => {
   const { email, name, password, birthday, sex, phone, address, id_card } =
     req.body;
@@ -104,7 +105,7 @@ exports.Login = async (req, res) => {
     }
 
     const [user] = await runQuery(
-      `SELECT id, id_card, name, sex, email, password_hash, role, profile_image_url FROM users WHERE email = :email`,
+      `SELECT id, id_card, name, sex, email, password_hash, role, profile_image_url,birthday, auth_image_url FROM users WHERE email = :email`,
       {
         email,
       },
@@ -127,6 +128,8 @@ exports.Login = async (req, res) => {
       password_hash: user.password_hash,
       role: user.role,
       profile_image_url: user.profile_image_url,
+      auth_image_url: user.auth_image_url,
+      birthday: user.birthday,
     };
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
@@ -149,8 +152,10 @@ exports.AuthMe = async (req, res) => {
     const userId = req.authUser.id;
 
     const [user] = await runQuery(
-      `SELECT id, id_card, name, sex, email, password_hash, role, profile_image_url FROM users WHERE id = :userId`,
-      { userId },
+      `SELECT id, id_card, name, sex, email, password_hash, role, profile_image_url,birthday, auth_image_url FROM users WHERE id = :userId`,
+      {
+        userId,
+      },
       QueryTypes.SELECT
     );
 
@@ -165,6 +170,8 @@ exports.AuthMe = async (req, res) => {
       password_hash: user.password_hash,
       role: user.role,
       profile_image_url: user.profile_image_url,
+      auth_image_url: user.auth_image_url,
+      birthday: user.birthday,
     });
   } catch (err) {
     console.log(err);
@@ -175,19 +182,35 @@ exports.AuthMe = async (req, res) => {
 exports.UpdateProfile = async (req, res) => {
   try {
     const userId = req.authUser.id;
-    console.log(userId);
 
-    const { email, gender, address, name, birthday } = req.body;
+    console.log(req.body);
 
+    const { email, gender, address, name, dateOfBirth } = req.body;
     let profileImageUrl = null;
     let profileBase64 = null;
     let authenImageUrl = null;
     let authenBase64 = null;
     let authenFace_emb = null;
 
-    const imageDir = path.join(process.cwd(), "img/profile");
-    if (!fs.existsSync(imageDir)) {
-      fs.mkdirSync(imageDir, { recursive: true });
+    const profileImageDir = path.join(process.cwd(), "img/profile");
+    const authenImageDir = path.join(process.cwd(), "img/auth");
+
+    const updates = [];
+    const replacements = {
+      email,
+      gender,
+      address,
+      name,
+      birthday: dateOfBirth,
+      userId,
+    };
+
+    if (!fs.existsSync(profileImageDir)) {
+      fs.mkdirSync(profileImageDir, { recursive: true });
+    }
+
+    if (!fs.existsSync(authenImageDir)) {
+      fs.mkdirSync(authenImageDir, { recursive: true });
     }
 
     if (req.files && req.files.image1) {
@@ -196,11 +219,13 @@ exports.UpdateProfile = async (req, res) => {
       const fileName1 = `profile-${Date.now()}${path.extname(
         file1.originalname
       )}`;
-      const filePath1 = path.join(imageDir, fileName1);
+      const filePath1 = path.join(profileImageDir, fileName1);
 
       fs.writeFileSync(filePath1, file1.buffer);
       profileBase64 = file1.buffer.toString("base64");
       profileImageUrl = `/img/profile/${fileName1}`;
+      updates.push("profile_image_url = :profile_image_url");
+      replacements.profile_image_url = profileImageUrl;
     }
 
     if (req.files && req.files.image2) {
@@ -209,27 +234,30 @@ exports.UpdateProfile = async (req, res) => {
       const fileName2 = `authen-${Date.now()}${path.extname(
         file2.originalname
       )}`;
-      const filePath2 = path.join(imageDir, fileName2);
+      const filePath2 = path.join(authenImageDir, fileName2);
 
       fs.writeFileSync(filePath2, file2.buffer);
       authenBase64 = file2.buffer.toString("base64");
       authenImageUrl = `/img/auth/${fileName2}`;
       authenFace_emb = await createEmbedding(authenBase64);
+      updates.push("auth_image_url = :auth_image_url");
+      replacements.auth_image_url = authenImageUrl;
     }
 
     await runQuery(
       `UPDATE users
-       SET email = :email, sex = :gender, address = :address, name = :name, birthday =:birthday, auth_image_url =:authenImageUrl 
+       SET email = :email, sex = :gender, address = :address, name = :name, birthday =:birthday
+       ${updates.length == 0 ? "" : "," + updates.join(", ")}
        WHERE id = :userId;`,
-      { email, gender, address, name, birthday, authenImageUrl, userId },
+      replacements,
       QueryTypes.UPDATE
     );
 
     if (req.files && req.files.image2) {
       await updateUser(userId, {
         name: name,
-        sex: gender.toString(),
-        age: calculateAge(birthday).toString(),
+        sex: gender,
+        age: calculateAge(dateOfBirth).toString(),
         address: address,
         remark: "",
         face_emb: authenFace_emb,

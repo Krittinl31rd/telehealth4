@@ -37,7 +37,7 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <Profile /> },
-      { path: "test", element: <Test /> },
+      // { path: "test", element: <Test /> },
     ],
   },
   {
