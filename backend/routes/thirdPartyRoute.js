@@ -9,6 +9,7 @@ const {
   Login,
   AuthMe,
   UpdateProfile,
+  DeleteUser
 } = require("../controller/registerControlller");
 const path = require("path");
 const { authenticate } = require("../middleware/authenticate");
@@ -34,5 +35,5 @@ router.post(
   UpdateProfile
 );
 router.post("/register", upload.single("image"), Register);
-
+router.post("/deleteuser", DeleteUser);
 module.exports = router;

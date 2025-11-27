@@ -219,8 +219,9 @@ exports.UpdateProfile = async (req, res) => {
       fs.writeFileSync(filePath1, file1.buffer);
       profileBase64 = file1.buffer.toString("base64");
       profileImageUrl = `/img/profile/${fileName1}`;
-      updates.push("profile_image_url = :profile_image_url");
+      updates.push("profile_image_url = :profile_image_url, profile_image_base64 = :profile_image_base64");
       replacements.profile_image_url = profileImageUrl;
+      replacements.profile_image_base64 = profileBase64;
     }
 
     if (req.files && req.files.image2) {
@@ -263,6 +264,32 @@ exports.UpdateProfile = async (req, res) => {
       message: "Profile updated successfully",
       image1: profileImageUrl,
       image2: authenImageUrl,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+exports.DeleteUser = async (req, res) => {
+  const { userId } = req.body;
+  console.log(userId);
+  try {
+    await runQuery(
+      `DELETE FROM users WHERE id=:userId;`,
+      { userId },
+      QueryTypes.DELETE
+    );
+
+    await dbface.read();
+    const newDbFace = dbface.data.filter((p) => p.usernum != userId);
+    // Push new face record
+    dbface.data = newDbFace;
+
+    dbface.write();
+
+    return res.status(200).json({
+      message: `User deleted successfully (userId: ${userId})`,
     });
   } catch (err) {
     console.error(err);
