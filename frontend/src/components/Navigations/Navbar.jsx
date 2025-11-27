@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { LogOut, User, User2 } from "lucide-react";
 import userRoundImage from "../../assets/img/user-round.png";
 
-const Navbar = ({ toggleDrawer, toggleTheme, theme }) => {
+const Navbar = ({ toggleDrawer = null, toggleTheme, theme }) => {
   const { user, actionLogout } = useAuthStore();
   const navigate = useNavigate();
   return (

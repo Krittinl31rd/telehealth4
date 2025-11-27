@@ -1,4 +1,5 @@
 import {
+  BriefcaseMedical,
   CalendarDays,
   CalendarDaysIcon,
   FolderPen,
@@ -42,5 +43,10 @@ export const getMenuItemsPatient = () => [
     path: `/patient/measurement_records`,
     label: "Measurement Records",
     icon: <FolderPen />,
+  },
+  {
+    path: `/patient/consult`,
+    label: "Consult Doctor",
+    icon: <BriefcaseMedical />,
   },
 ];

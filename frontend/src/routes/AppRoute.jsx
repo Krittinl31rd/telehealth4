@@ -11,8 +11,11 @@ import DashboardAdmin from "../pages/admin/Dashboard";
 import DashboardDoctor from "../pages/doctor/Dashboard";
 import DashboardPatient from "../pages/patient/Dashboard";
 import Measurement from "../pages/patient/Measurement";
-import Usermanagement from "../pages/admin/Usermanagement"
+import Usermanagement from "../pages/admin/Usermanagement";
 import Profile from "../pages/Profile";
+import HomeRTC from "../pages/rtc/Home";
+import NavLayout from "../components/NavLayout";
+import Consult from "../pages/patient/Consult";
 
 const router = createBrowserRouter([
   { path: "/", element: <Login /> },
@@ -29,7 +32,8 @@ const router = createBrowserRouter([
       { path: "test", element: <Test /> },
     ],
   },
-    {
+
+  {
     path: "/usermanagement",
     element: (
       <ProtectedRoute allowedPlatformRoles={[user_role.a]}>
@@ -41,10 +45,12 @@ const router = createBrowserRouter([
       { path: "test", element: <Test /> },
     ],
   },
-   {
+  {
     path: "/profile",
     element: (
-      <ProtectedRoute allowedPlatformRoles={[user_role.a,user_role.d,user_role.p]}>
+      <ProtectedRoute
+        allowedPlatformRoles={[user_role.a, user_role.d, user_role.p]}
+      >
         <MainLayout />
       </ProtectedRoute>
     ),
@@ -75,7 +81,19 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <DashboardPatient /> },
       { path: "measurement_records", element: <Measurement /> },
+      { path: "consult", element: <Consult /> },
     ],
+  },
+  {
+    path: "/call",
+    element: (
+      <ProtectedRoute
+        allowedPlatformRoles={[user_role.p, user_role.a, user_role.d]}
+      >
+        <NavLayout />
+      </ProtectedRoute>
+    ),
+    children: [{ index: true, element: <HomeRTC /> }],
   },
 
   // error pages

@@ -1,6 +1,10 @@
 require("dotenv").config();
+const fs = require("fs");
+const path = require("path");
+const https = require("https");
 const WebSocket = require("ws");
 const { v4: uuidv4 } = require("uuid");
+
 const {
   addWsClient,
   getWsClients,
@@ -8,19 +12,37 @@ const {
   broadcastToLogInClients,
   sendToClientID,
 } = require("./utils/wsClients");
-const jwt = require("jsonwebtoken");
 
+const jwt = require("jsonwebtoken");
 const { ws_cmd } = require("./constant/enum");
 
+// HTTPS options
+const keyPath = path.resolve(__dirname, "certs/privateKey.key");
+const certPath = path.resolve(__dirname, "certs/_.archismartsolution.com.pem");
+
+const httpsOptions = {
+  key: fs.readFileSync(keyPath),
+  cert: fs.readFileSync(certPath),
+};
+
+// Create HTTPS server
+const server = https.createServer(httpsOptions);
+
 (async () => {
+  // Create WebSocket server attached to HTTPS server
   const wss = new WebSocket.Server({
-    port: process.env.WS_PORT,
+    server,
     path: "/echo",
   });
-  console.log(`[WS] running on port: ${process.env.WS_PORT}`);
+
+  // Start HTTPS server
+  server.listen(process.env.WS_PORT, () => {
+    console.log(`[WS] running on port: ${process.env.WS_PORT}`);
+  });
 
   wss.on("connection", (ws) => {
     console.log("[WS] Client connected");
+
     const infoClient = {
       id: uuidv4(),
       socket: ws,
@@ -29,6 +51,7 @@ const { ws_cmd } = require("./constant/enum");
       ip: ws._socket.remoteAddress || null,
       lastTimestamp: Date.now(),
     };
+
     addWsClient(infoClient);
 
     ws.on("message", async (message) => {
@@ -37,6 +60,7 @@ const { ws_cmd } = require("./constant/enum");
 
         if (cmd == ws_cmd.login) {
           const { token } = params;
+
           if (infoClient.isLogin) {
             return ws.send(
               JSON.stringify({
@@ -45,38 +69,28 @@ const { ws_cmd } = require("./constant/enum");
               })
             );
           }
+
           try {
-            const decoded = await jwt.verify(token, process.env.JWT_SECRET);
+            const decoded = jwt.verify(token, process.env.JWT_SECRET);
             infoClient.isLogin = true;
             infoClient.user = decoded;
-            const clientUser = getWsClients().find(
-              (c) => c.user?.id == decoded.id
-            );
-            console.log(
-              `[WS] Clients now: [${clientUser?.user?.id}]${clientUser?.user?.name}`
-            );
+
             ws.send(
               JSON.stringify({
                 cmd: ws_cmd.login,
-                params: {
-                  status: "success",
-                  message: "Login successful",
-                },
+                params: { status: "success", message: "Login successful" },
               })
             );
+
             return;
           } catch (err) {
-            console.log(`Client ${infoClient.id} login failed: ${err.message}`);
+            console.log(`Login failed: ${err.message}`);
             return ws.send(
               JSON.stringify({
                 cmd: ws_cmd.login,
                 params: { status: "error", message: err.message },
               })
             );
-          }
-        } else if (cmd == "test") {
-          if (infoClient.isLogin == true) {
-            const {} = params;
           }
         }
       } catch (err) {
@@ -90,7 +104,5 @@ const { ws_cmd } = require("./constant/enum");
     });
   });
 
-  module.exports = {
-    wss,
-  };
+  module.exports = { wss };
 })();
