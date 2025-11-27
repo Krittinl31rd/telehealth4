@@ -13,10 +13,14 @@ const Pagination = ({ items = [], itemsPerPage = 8, onChange }) => {
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentItems = items.slice(startIndex, endIndex);
-
+  
   useEffect(() => {
-    onChange?.(currentItems);
-  }, [currentItems]);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const sliced = items.slice(startIndex, endIndex);
+
+    onChange?.(sliced);
+  }, [currentPage, items, itemsPerPage]);
 
   const getPageNumbers = () => {
     const pages = [];

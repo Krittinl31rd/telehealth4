@@ -5,35 +5,46 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-import { user_role } from "../../constant/enum";
+
+import { user_role, user_sex } from "../../constant/enum";
 import { UsersAll } from "../../api/usermanagement";
 import Pagination from "../../components/Pagination";
 import useAuthStore from "../../store/auth";
-
+import Modal from "../../components/shared/Modal";
+import Modal2 from "../../components/shared/Modal2";
+import { calculateAge } from "../../hooks/helper";
 const Usermanagement = () => {
   const [currentUsers, setCurrentUsers] = useState([]);
   const [allUsers, setAllUsers] = useState([]);
+  const [focusUser, setFocusUser] = useState(null);
   const [loadingTypes, setLoadingTypes] = useState([]);
   const { token } = useAuthStore();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpenDetail, setModalOpenDetail] = useState(false);
+  const [openMenuUserId, setOpenMenuUserId] = useState(null);
+
+  const fetchUsers = async () => {
+    try {
+      const res = await UsersAll(token);
+      console.log("Success:", res.data);
+      setAllUsers(res.data);
+    } catch (err) {
+      console.log("Upload error:", err);
+    } finally {
+      setLoadingTypes(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const res = await UsersAll(token);
-        console.log("Success:", res.data);
-        setAllUsers(res.data);
-      } catch (err) {
-        console.log("Upload error:", err);
-      } finally {
-        setLoadingTypes(false);
-      }
-    };
-
     fetchUsers();
   }, []);
 
   return loadingTypes ? (
-    <div></div>
+    <div className="text-center py-10">
+      <span className="loading loading-spinner   loading-lg"></span>
+      {/* <br /> */}
+      {/* Loading measurement types... */}
+    </div>
   ) : (
     <div className="w-full h-full p-0 bg-base-200 overflow-auto">
       {/* Main Content */}
@@ -82,8 +93,16 @@ const Usermanagement = () => {
                         src={`${import.meta.env.VITE_API_URL}${
                           user.profile_image_url
                         }`}
-                        alt={user.name}
-                        className="w-full h-full object-cover"
+                        alt={user.name[0]}
+                        className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+                        onError={(e) => {
+                          e.target.style.display = "none";
+                          const fallback = document.createElement("div");
+                          fallback.className =
+                            "w-10 h-10 rounded-full bg-primary flex items-center justify-center text-white font-semibold text-sm flex-shrink-0";
+                          fallback.innerText = user.name[0];
+                          e.target.parentNode.appendChild(fallback);
+                        }}
                       />
                     </div>
                   ) : (
@@ -120,9 +139,44 @@ const Usermanagement = () => {
 
                 {/* Actions */}
                 <div className="col-span-1 flex justify-end">
-                  <button className="p-2 hover:bg-gray-100 rounded-md transition-colors">
-                    <MoreVertical size={16} className="text-gray-400" />
-                  </button>
+                  {/* Desktop More Button */}
+                  <div className="col-span-1 relative flex justify-end">
+                    <button
+                      className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+                      onClick={() =>
+                        setOpenMenuUserId(
+                          openMenuUserId === user.id ? null : user.id
+                        )
+                      }
+                    >
+                      <MoreVertical size={16} className="text-gray-400" />
+                    </button>
+
+                    {/* Dropdown */}
+                    {openMenuUserId === user.id && (
+                      <div className="absolute right-7 top-0 bg-white border border-gray-200 rounded-md shadow-md z-50 w-40">
+                        <button
+                          className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                          onClick={() => {
+                            setOpenMenuUserId(null);
+                            setFocusUser(user);
+                            setModalOpenDetail(true);
+                          }}
+                        >
+                          View Details
+                        </button>
+                        <button
+                          className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-red-600"
+                          onClick={() => {
+                            setOpenMenuUserId(null);
+                            setModalOpen(true);
+                          }}
+                        >
+                          Delete User
+                        </button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
@@ -155,7 +209,7 @@ const Usermanagement = () => {
                     >
                       <img
                         src={`https://i.pravatar.cc/48?img=${user.id}`}
-                        alt={user.name}
+                        alt={user.name[0]}
                         className="w-full h-full object-cover"
                       />
                     </div>
@@ -180,9 +234,44 @@ const Usermanagement = () => {
                   </div>
                 </div>
 
-                <button className="p-2 hover:bg-gray-100 rounded-md transition-colors flex-shrink-0">
-                  <MoreVertical size={16} className="text-gray-400" />
-                </button>
+                {/* Desktop More Button */}
+                <div className="col-span-1 relative flex justify-end">
+                  <button
+                    className="p-2 hover:bg-gray-100 rounded-md transition-colors"
+                    onClick={() =>
+                      setOpenMenuUserId(
+                        openMenuUserId === user.id ? null : user.id
+                      )
+                    }
+                  >
+                    <MoreVertical size={16} className="text-gray-400" />
+                  </button>
+
+                  {/* Dropdown */}
+                  {openMenuUserId === user.id && (
+                    <div className="absolute right-6 top-1 bg-white border border-gray-200 rounded-md shadow-md z-50 w-40">
+                      <button
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                        onClick={() => {
+                          setOpenMenuUserId(null);
+                          setFocusUser(user);
+                          setModalOpenDetail(true);
+                        }}
+                      >
+                        View Details
+                      </button>
+                      <button
+                        className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-red-600"
+                        onClick={() => {
+                          setOpenMenuUserId(null);
+                          setModalOpen(true);
+                        }}
+                      >
+                        Delete User
+                      </button>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           ))}
@@ -197,6 +286,55 @@ const Usermanagement = () => {
           )}
         </div>
       </div>
+      {/* DELETE MODAL */}
+
+      <Modal2
+        title="View Profile"
+        open={modalOpenDetail}
+        onClose={() => setModalOpenDetail(false)}
+      >
+        <div className="flex flex-col items-center justify-center">
+          <div className="avatar">
+            <div className="w-24 h-24 rounded-full">
+              <img
+                src={`${import.meta.env.VITE_API_URL}${
+                  focusUser?.profile_image_url
+                }`}
+                alt={focusUser?.name[0]}
+                onError={(e) => {
+                  e.target.style.display = "none";
+                  const fallback = document.createElement("div");
+                  fallback.className =
+                    "w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white font-semibold text-2xl flex-shrink-0";
+                  fallback.innerText = focusUser.name[0];
+                  e.target.parentNode.appendChild(fallback);
+                }}
+              />
+            </div>
+          </div>
+          <h1 className="text-2xl">{focusUser?.name}</h1>
+          <h1 className="text-xl">
+            {focusUser?.id_card.slice(0, 2) +
+              "XXXXXX" +
+              focusUser?.id_card.slice(9, 13)}
+          </h1>
+          <h1>
+            {user_sex.find((x) => x.value.toString() == focusUser?.sex)?.label}{" "}
+          </h1>
+          <h1>{focusUser?.email}</h1>
+          <h1>{focusUser?.role}</h1>
+          <h1>{focusUser?.birthday}</h1>
+          <h1>{calculateAge(focusUser?.birthday)}</h1>
+        </div>
+      </Modal2>
+
+      <Modal
+        title={`Delete ${focusUser?.name}?`}
+        children="Are you sure?"
+        show={modalOpen}
+        onClose={() => setModalOpen(false)}
+        confirm={() => setModalOpen(false)}
+      ></Modal>
     </div>
   );
 };
