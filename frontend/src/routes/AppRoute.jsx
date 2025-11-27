@@ -11,6 +11,7 @@ import DashboardAdmin from "../pages/admin/Dashboard";
 import DashboardDoctor from "../pages/doctor/Dashboard";
 import DashboardPatient from "../pages/patient/Dashboard";
 import Measurement from "../pages/patient/Measurement";
+import Usermanagement from "../pages/admin/Usermanagement";
 import Profile from "../pages/Profile";
 import HomeRTC from "../pages/rtc/Home";
 import NavLayout from "../components/NavLayout";
@@ -28,6 +29,19 @@ const router = createBrowserRouter([
     ),
     children: [
       { index: true, element: <DashboardAdmin /> },
+      { path: "test", element: <Test /> },
+    ],
+  },
+
+  {
+    path: "/usermanagement",
+    element: (
+      <ProtectedRoute allowedPlatformRoles={[user_role.a]}>
+        <MainLayout />
+      </ProtectedRoute>
+    ),
+    children: [
+      { index: true, element: <Usermanagement /> },
       { path: "test", element: <Test /> },
     ],
   },

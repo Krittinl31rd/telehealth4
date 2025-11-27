@@ -4,6 +4,7 @@ import {
   CalendarDaysIcon,
   FolderPen,
   LayoutDashboard,
+  Users
 } from "lucide-react";
 
 export const getMenuItemsAdmin = () => [
@@ -11,6 +12,11 @@ export const getMenuItemsAdmin = () => [
     path: `/admin`,
     label: "Dashboard",
     icon: <LayoutDashboard />,
+  },
+    {
+    path: `/usermanagement`,
+    label: "Users Management",
+    icon: <Users />,
   },
 ];
 
