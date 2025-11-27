@@ -1,6 +1,9 @@
 const { createEmbedding, cosineSimilarity } = require("../helper/model_emb");
-
 const { dbface } = require("../lowdb/lowdb");
+const runQuery = require("../helper/queryHelper");
+const { QueryTypes } = require("sequelize");
+const { calculateAge } = require("../helper/update_user");
+const { getWsClients } = require("../utils/wsClients");
 
 exports.ConvertImg = async (req, res) => {
   try {
@@ -86,24 +89,27 @@ exports.Auth = async (req, res) => {
   const { action, deviceID, type, xid } = req.body;
 
   try {
-    const match = faceDB.find((item) => item.usernum == xid);
-    console.log(action);
-    console.log(deviceID);
-    console.log(type);
-    console.log(xid);
-    if (!match) return res.status(200).json({ retCode: 0 });
+    const [match] = await runQuery(
+      `SELECT id_card,  id, name, sex, birthday, profile_image_base64 
+      FROM users WHERE id_card = :id_card`,
+      { id_card: xid },
+      QueryTypes.SELECT
+    );
+
+    if (!match) return res.status(404).json({ retCode: 0 });
+    console.log();
     return res.status(200).json({
       retCode: 1,
       uinfo: {
-        title: "test",
-        cardID: "xxxxxxxxxxxxxx",
-        userNum: match.usernum,
-        name: match.name,
-        sex: match.sex,
-        age: match.age,
+        title: "Archi-tronic Co., Ltd.",
+        cardID: match?.id_card || "",
+        userNum: match?.id.toString() || "",
+        name: match?.name || "",
+        sex: match?.sex.toString() || "",
+        age: calculateAge(match?.birthday).toString() || "",
         headimgurl: "",
-        imgBaseData: "",
-        remark: match.remark,
+        imgBaseData: match?.profile_image_base64 || "",
+        remark: "",
       },
       dbinfo: {
         loc: "",
@@ -113,6 +119,6 @@ exports.Auth = async (req, res) => {
     });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ message: "Internal Server Error" });
+    return res.status(500).json({ retCode: 0 });
   }
 };

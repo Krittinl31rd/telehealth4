@@ -106,8 +106,20 @@ Flow การทำงาน Telehealth + Device
 
 
 --------------------- INITDATA ---------------------
+INSERT INTO `telehealth4`.`users`
+(`role`,`email`,`password_hash`) VALUES('admin', 'admin@admin.com',
+'$2b$10$RW1xPR.jDXTrd4qwcOqRlO28GqFapWISlTvquKuxm3ZsyjfsMSreS');
+
+
 INSERT INTO `telehealth4`.`devices`
 (`device_id`,`location`) VALUES('G240416165614686', 'Bangkok');
+
+INSERT INTO `specialization` (`id`,`name`, `description`) VALUES (1,'General Practitioner','เวชปฏิบัติ'),(2,'Internal medicine','อายุรกรรม'),
+(3,'Infectious Disease Specialist','แพทย์เฉพาะทางโรคติดเชื้อ'),(4,'Oncologist','แพทย์เฉพาะทางโรคมะเร็ง'),
+(5,'Cardiologist','แพทย์เฉพาะทางโรคหัวใจ'),(6,'Psychiatrist','แพทย์เฉพาะทางโรคจิตเวช'),
+(7,'Neurologist','แพทย์เฉพาะทางด้านประสาทวิทยา'),(8,'Digital Health and Telemedicine','แพทย์เฉพาะทางการแพทย์ดิจิทัล'),
+(9,'Anti-Aging and Regenerative Medicine','แพทย์เฉพาะทางด้านการฟื้นฟูสุขภาพและชะลอวัย'),
+(10,'Orthopaedic','กระดูก ข้อ เส้นเอ็น และกล้ามเนื้อต่างๆ');
 
 INSERT INTO `telehealth4`.`measurement_types`
 (`code`, `name`) VALUES('BMI', 'Height and weight results'),('BP', 'Blood pressure and heart rate results'),('BF', 'Body composition analysis'),
@@ -115,3 +127,4 @@ INSERT INTO `telehealth4`.`measurement_types`
 ('zytz', 'Traditional Chinese Medicine Constitution Identification'),('ecg', 'ECG analysis'),('xzsx', 'Four items of blood lipids'),('eye', 'Vision measurement'),
 ('sds', 'Psychological Testing SDS'),('thxhdb', 'Glycated hemoglobin test'),('fei', 'Spirometry test'),('jiu', 'Alcohol content test'),('gmd', 'Bone density'),
 ('com', 'Bone quality is average');
+
