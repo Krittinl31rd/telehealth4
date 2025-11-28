@@ -4,11 +4,39 @@ const {
   sendToClientID,
   broadcastToLogInClients,
 } = require("../utils/wsClients");
-const { measurement_types, sectionList, ws_cmd } = require("../constant/enum");
+const {
+  measurement_types,
+  sectionList,
+  ws_cmd,
+  user_role,
+} = require("../constant/enum");
 
 exports.GetDoctors = async (req, res) => {
   try {
-    return res.status(200).json({});
+    const resp = await runQuery(
+      `
+        SELECT
+        u.id,
+        u.name,
+        u.sex,
+        u.profile_image_url,
+        sep.id,
+        sep.name AS sep_name,
+        sep.description,
+        d.license_number,
+        d.years_of_experience,
+        d.affiliated_hospital,
+        d.profile_detail,
+        d.status
+        FROM users u
+        LEFT JOIN doctor d ON d.doctor_id = u.id
+        LEFT JOIN specialization sep ON sep.id = d.specialization_id
+        WHERE role = :role AND d.status = 1
+        `,
+      { role: user_role.d },
+      QueryTypes.SELECT
+    );
+    return res.status(200).json(resp);
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Internal Server Error" });
