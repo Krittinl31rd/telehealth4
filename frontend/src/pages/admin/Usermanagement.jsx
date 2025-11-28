@@ -5,9 +5,9 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
-
+import { toast } from "sonner";
 import { user_role, user_sex } from "../../constant/enum";
-import { UsersAll } from "../../api/usermanagement";
+import { UsersAll, UserDelete } from "../../api/usermanagement";
 import Pagination from "../../components/Pagination";
 import useAuthStore from "../../store/auth";
 import Modal from "../../components/shared/Modal";
@@ -32,6 +32,25 @@ const Usermanagement = () => {
       console.log("Upload error:", err);
     } finally {
       setLoadingTypes(false);
+    }
+  };
+
+  useEffect(() => {
+    console.log(focusUser);
+  }, []);
+
+  const handleUsersDelete = async (id) => {
+    try {
+      console.log(id);
+
+      const res = await UserDelete(id, token);
+      setModalOpen(false);
+      toast.success(res.data.message);
+      fetchUsers();
+      // setAllUsers(res.data);
+    } catch (err) {
+      toast.error(err.response.data);
+      setModalOpen(false);
     }
   };
 
@@ -154,9 +173,9 @@ const Usermanagement = () => {
 
                     {/* Dropdown */}
                     {openMenuUserId === user.id && (
-                      <div className="absolute right-7 top-0 bg-white border border-gray-200 rounded-md shadow-md z-50 w-40">
+                      <div className="absolute right-7 top-0 bg-base-100 border border-gray-100 rounded-md shadow-md z-50 w-40">
                         <button
-                          className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                          className="w-full text-left px-4 py-2 hover:bg-gray-100 hover:text-gray-500 text-sm"
                           onClick={() => {
                             setOpenMenuUserId(null);
                             setFocusUser(user);
@@ -169,6 +188,7 @@ const Usermanagement = () => {
                           className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-red-600"
                           onClick={() => {
                             setOpenMenuUserId(null);
+                            setFocusUser(user);
                             setModalOpen(true);
                           }}
                         >
@@ -264,6 +284,7 @@ const Usermanagement = () => {
                         className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm text-red-600"
                         onClick={() => {
                           setOpenMenuUserId(null);
+                          setFocusUser(user);
                           setModalOpen(true);
                         }}
                       >
@@ -293,38 +314,101 @@ const Usermanagement = () => {
         open={modalOpenDetail}
         onClose={() => setModalOpenDetail(false)}
       >
-        <div className="flex flex-col items-center justify-center">
-          <div className="avatar">
-            <div className="w-24 h-24 rounded-full">
-              <img
-                src={`${import.meta.env.VITE_API_URL}${
-                  focusUser?.profile_image_url
-                }`}
-                alt={focusUser?.name[0]}
-                onError={(e) => {
-                  e.target.style.display = "none";
-                  const fallback = document.createElement("div");
-                  fallback.className =
-                    "w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white font-semibold text-2xl flex-shrink-0";
-                  fallback.innerText = focusUser.name[0];
-                  e.target.parentNode.appendChild(fallback);
-                }}
-              />
+        <div className="bg-white p-6 rounded-xl shadow-lg w-full max-w-sm mx-auto">
+          <div className="flex flex-col items-center text-center space-y-3">
+            {/* Avatar */}
+            <div className="avatar">
+              <div className="w-24 h-24 rounded-full ring ring-primary ring-offset-2 shadow-md">
+                <img
+                  src={`${import.meta.env.VITE_API_URL}${
+                    focusUser?.profile_image_url
+                  }`}
+                  alt={focusUser?.name[0]}
+                  onError={(e) => {
+                    e.target.style.display = "none";
+                    const fallback = document.createElement("div");
+                    fallback.className =
+                      "w-24 h-24 rounded-full bg-primary flex items-center justify-center text-white font-semibold text-3xl";
+                    fallback.innerText = focusUser.name[0];
+                    e.target.parentNode.appendChild(fallback);
+                  }}
+                />
+              </div>
+            </div>
+
+            {/* Info */}
+            <div className="space-y-3 w-full">
+              <div>
+                <p className="text-sm text-gray-500 uppercase tracking-wide">
+                  Name
+                </p>
+                <p className="text-lg font-medium">{focusUser?.name}</p>
+              </div>
+
+              <div className="w-full h-px bg-gray-200"></div>
+
+              <div>
+                <p className="text-sm text-gray-500 uppercase tracking-wide">
+                  ID Card
+                </p>
+                <p>
+                  {focusUser?.id_card.slice(0, 2) +
+                    "XXXXXX" +
+                    focusUser?.id_card.slice(9, 13)}
+                </p>
+              </div>
+
+              <div className="w-full h-px bg-gray-200"></div>
+
+              <div>
+                <p className="text-sm text-gray-500 uppercase tracking-wide">
+                  Sex
+                </p>
+                <p>
+                  {
+                    user_sex.find((x) => x.value.toString() == focusUser?.sex)
+                      ?.label
+                  }
+                </p>
+              </div>
+
+              <div className="w-full h-px bg-gray-200"></div>
+
+              <div>
+                <p className="text-sm text-gray-500 uppercase tracking-wide">
+                  Email
+                </p>
+                <p>{focusUser?.email}</p>
+              </div>
+
+              <div className="w-full h-px bg-gray-200"></div>
+
+              <div>
+                <p className="text-sm text-gray-500 uppercase tracking-wide">
+                  Role
+                </p>
+                <p className="capitalize">{focusUser?.role}</p>
+              </div>
+
+              <div className="w-full h-px bg-gray-200"></div>
+
+              <div>
+                <p className="text-sm text-gray-500 uppercase tracking-wide">
+                  Birthday
+                </p>
+                <p>{focusUser?.birthday}</p>
+              </div>
+
+              <div className="w-full h-px bg-gray-200"></div>
+
+              <div>
+                <p className="text-sm text-gray-500 uppercase tracking-wide">
+                  Age
+                </p>
+                <p>{calculateAge(focusUser?.birthday)}</p>
+              </div>
             </div>
           </div>
-          <h1 className="text-2xl">{focusUser?.name}</h1>
-          <h1 className="text-xl">
-            {focusUser?.id_card.slice(0, 2) +
-              "XXXXXX" +
-              focusUser?.id_card.slice(9, 13)}
-          </h1>
-          <h1>
-            {user_sex.find((x) => x.value.toString() == focusUser?.sex)?.label}{" "}
-          </h1>
-          <h1>{focusUser?.email}</h1>
-          <h1>{focusUser?.role}</h1>
-          <h1>{focusUser?.birthday}</h1>
-          <h1>{calculateAge(focusUser?.birthday)}</h1>
         </div>
       </Modal2>
 
@@ -333,7 +417,7 @@ const Usermanagement = () => {
         children="Are you sure?"
         show={modalOpen}
         onClose={() => setModalOpen(false)}
-        confirm={() => setModalOpen(false)}
+        confirm={() => handleUsersDelete(focusUser?.id)}
       ></Modal>
     </div>
   );
