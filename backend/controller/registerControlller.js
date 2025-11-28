@@ -13,14 +13,14 @@ exports.Register = async (req, res) => {
 
   try {
     const [user] = await runQuery(
-      `SELECT * FROM users WHERE email = :email`,
-      { email },
+      `SELECT * FROM users WHERE email = :email OR id_card = :id_card`,
+      { email, id_card },
       QueryTypes.SELECT
     );
 
     if (user) {
       return res.status(401).json({
-        message: "Email is already used",
+        message: "Email or ID_card is already used",
       });
     }
 
