@@ -16,6 +16,7 @@ import Profile from "../pages/Profile";
 import HomeRTC from "../pages/rtc/Home";
 import NavLayout from "../components/NavLayout";
 import Consult from "../pages/patient/Consult";
+import Appointments from "../pages/patient/Appointments";
 
 const router = createBrowserRouter([
   { path: "/", element: <Login /> },
@@ -82,6 +83,7 @@ const router = createBrowserRouter([
       { index: true, element: <DashboardPatient /> },
       { path: "measurement_records", element: <Measurement /> },
       { path: "consult", element: <Consult /> },
+      { path: "appointments", element: <Appointments /> },
     ],
   },
   {
