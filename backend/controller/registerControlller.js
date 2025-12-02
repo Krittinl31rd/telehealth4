@@ -7,6 +7,7 @@ const { dbface } = require("../lowdb/lowdb");
 const { createEmbedding } = require("../helper/model_emb");
 const jwt = require("jsonwebtoken");
 const { updateUser, calculateAge } = require("../helper/update_user");
+const { user_role } = require("../constant/enum");
 
 exports.Register = async (req, res) => {
   const { email, name, password, birthday, sex, id_card } = req.body;
@@ -114,17 +115,28 @@ exports.Login = async (req, res) => {
     if (!match)
       return res.status(401).json({ message: "Invalid email or password" });
 
+    // let doctor_profile = null;
+    // if (user.role == user_role.d) {
+    //   const [doctor] = await runQuery(
+    //     `SELECT * FROM doctor WHERE doctor_id = :doctor_id`,
+    //     { doctor_id: user.id },
+    //     QueryTypes.SELECT
+    //   );
+    //   doctor_profile = doctor;
+    // }
+
     const payload = {
       id: user.id,
-      id_card: user.id_card,
-      name: user.name,
-      sex: user.sex,
-      email: user.email,
-      password_hash: user.password_hash,
+      // id_card: user.id_card,
+      // name: user.name,
+      // sex: user.sex,
+      // email: user.email,
+      // password_hash: user.password_hash,
       role: user.role,
-      profile_image_url: user.profile_image_url,
-      auth_image_url: user.auth_image_url,
-      birthday: user.birthday,
+      // profile_image_url: user.profile_image_url,
+      // auth_image_url: user.auth_image_url,
+      // birthday: user.birthday,
+      // doctor_profile,
     };
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
@@ -133,7 +145,7 @@ exports.Login = async (req, res) => {
 
     return res.status(200).json({
       token,
-      user,
+      user: payload,
       message: `Welcom back, ${user?.name}`,
     });
   } catch (err) {
@@ -156,6 +168,16 @@ exports.AuthMe = async (req, res) => {
 
     if (!user) return res.status(403).json({ message: "User not found" });
 
+    let doctor_profile = null;
+    if (user.role == user_role.d) {
+      const [doctor] = await runQuery(
+        `SELECT * FROM doctor WHERE doctor_id = :doctor_id`,
+        { doctor_id: user.id },
+        QueryTypes.SELECT
+      );
+      doctor_profile = doctor;
+    }
+
     res.status(200).json({
       id: user.id,
       id_card: user.id_card,
@@ -167,6 +189,7 @@ exports.AuthMe = async (req, res) => {
       profile_image_url: user.profile_image_url,
       auth_image_url: user.auth_image_url,
       birthday: user.birthday,
+      doctor_profile,
     });
   } catch (err) {
     console.log(err);
@@ -219,7 +242,9 @@ exports.UpdateProfile = async (req, res) => {
       fs.writeFileSync(filePath1, file1.buffer);
       profileBase64 = file1.buffer.toString("base64");
       profileImageUrl = `/img/profile/${fileName1}`;
-      updates.push("profile_image_url = :profile_image_url, profile_image_base64 = :profile_image_base64");
+      updates.push(
+        "profile_image_url = :profile_image_url, profile_image_base64 = :profile_image_base64"
+      );
       replacements.profile_image_url = profileImageUrl;
       replacements.profile_image_base64 = profileBase64;
     }

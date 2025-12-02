@@ -25,116 +25,157 @@ const Consult = () => {
       setDoctors(data);
     } catch (err) {
       console.log(err);
+      toast.error("Failed to load doctors. Please try again.");
     } finally {
-      setTimeout(() => setLoadingDoctors(false), 500);
+      setTimeout(() => setLoadingDoctors(false), 400);
     }
   };
 
   useEffect(() => {
+    if (step == 1) {
+      setSymptomForm({
+        symptoms: "",
+        duration: "",
+        severity: "mild",
+        additional: "",
+      });
+    }
     if (step == 2) fetchDoctors();
-  }, [token, step]);
+  }, [step]);
 
   const handleNext = () => {
     if (!symptomForm.symptoms) {
-      toast.warning("Please fill in your symptoms.");
+      toast.warning("Please describe your symptoms.");
       return;
     }
-    console.log(symptomForm);
     setStep(2);
   };
 
   return (
     <div className="w-full h-full p-4 bg-base-200 overflow-auto space-y-4">
-      <h1 className="text-2xl font-bold">Find your Doctor</h1>
-
+      {/* STEP 1 – Symptom Intake */}
       {step == 1 && (
-        <div className="grid grid-cols-1 gap-2 bg-base-100 p-4 rounded-xl shadow">
-          <h2 className="col-span-1 text-xl font-semibold">Initial symptoms</h2>
+        <>
+          <h1 className="text-3xl font-bold text-primary">Consult a Doctor</h1>
+          <p className="text-base-content/70">
+            Answer a few questions so we can match you with the right
+            specialist.
+          </p>
+          <div className="bg-base-100 p-4 rounded-2xl shadow space-y-4 border border-base-300">
+            <h2 className="text-xl font-semibold border-b pb-2">
+              Patient Symptom Intake
+            </h2>
 
-          <div className="flex flex-col">
-            <label className="label">
-              <span className="label-text font-medium">Symptoms found</span>
-            </label>
-            <textarea
-              className="textarea textarea-bordered w-full"
-              placeholder="Headache, fever, cough..."
-              value={symptomForm.symptoms}
-              onChange={(e) =>
-                setSymptomForm({ ...symptomForm, symptoms: e.target.value })
-              }
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <div className="flex flex-col">
-              <label className="label">
-                <span className="label-text font-medium">
-                  Time of onset of symptoms
-                </span>
-              </label>
-              <input
-                type="text"
-                className="input input-bordered w-full"
-                placeholder="Such as 2 days, 1 week"
-                value={symptomForm.duration}
+            {/* Symptoms */}
+            <div className="flex flex-col gap-1">
+              <label className="font-medium">Symptoms</label>
+              <textarea
+                className="textarea textarea-bordered w-full resize-none"
+                rows={3}
+                placeholder="e.g., headache, fever, cough"
+                value={symptomForm.symptoms}
                 onChange={(e) =>
-                  setSymptomForm({ ...symptomForm, duration: e.target.value })
+                  setSymptomForm({ ...symptomForm, symptoms: e.target.value })
                 }
               />
             </div>
 
-            <div className="flex flex-col">
-              <label className="label">
-                <span className="label-text font-medium">
-                  Severity of symptoms
-                </span>
-              </label>
-              <select
-                className="select select-bordered w-full"
-                value={symptomForm.severity}
-                onChange={(e) =>
-                  setSymptomForm({ ...symptomForm, severity: e.target.value })
-                }
-              >
-                <option value="mild">a little</option>
-                <option value="moderate">moderate</option>
-                <option value="severe">severe</option>
-              </select>
+            {/* Duration + Severity */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="flex flex-col gap-1">
+                <label className="font-medium">Symptom Duration</label>
+                <select
+                  className="select select-bordered w-full"
+                  value={symptomForm.duration}
+                  onChange={(e) =>
+                    setSymptomForm({ ...symptomForm, duration: e.target.value })
+                  }
+                >
+                  <option value="">Select duration</option>
+                  <option value="1-2 days">1–2 days</option>
+                  <option value="3-5 days">3–5 days</option>
+                  <option value="1 week">1 week</option>
+                  <option value="more than 1 week">More than 1 week</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col gap-1">
+                <label className="font-medium">Symptom Severity</label>
+
+                <div className="flex items-center gap-3">
+                  {["mild", "moderate", "severe"].map((level) => (
+                    <label
+                      key={level}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <input
+                        type="radio"
+                        className="radio radio-primary"
+                        value={level}
+                        checked={symptomForm.severity == level}
+                        onChange={(e) =>
+                          setSymptomForm({
+                            ...symptomForm,
+                            severity: e.target.value,
+                          })
+                        }
+                      />
+                      <span className="capitalize">{level}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
 
-          <div className="flex flex-col">
-            <label className="label">
-              <span className="label-text font-medium">
-                Additional information (if any)
-              </span>
-            </label>
-            <textarea
-              className="textarea textarea-bordered w-full"
-              placeholder="Provide additional history, such as drug allergies or chronic illnesses."
-              value={symptomForm.additional}
-              onChange={(e) =>
-                setSymptomForm({ ...symptomForm, additional: e.target.value })
-              }
-            />
-          </div>
+            {/* Additional Info */}
+            <div className="flex flex-col gap-1">
+              <label className="font-medium">Additional Information</label>
+              <textarea
+                className="textarea textarea-bordered w-full resize-none"
+                rows={2}
+                placeholder="Drug allergies, chronic conditions, medications..."
+                value={symptomForm.additional}
+                onChange={(e) =>
+                  setSymptomForm({ ...symptomForm, additional: e.target.value })
+                }
+              />
+            </div>
 
-          <button onClick={handleNext} className="btn btn-primary w-full mt-2">
-            Find a doctor who is ready to provide advice.
-          </button>
-        </div>
+            <button
+              onClick={handleNext}
+              className="btn btn-primary w-full mt-2"
+            >
+              Find Available Doctors
+            </button>
+          </div>
+        </>
       )}
 
-      {step == 2 &&
-        (loadingDoctors ? (
-          <LoadingScreen />
-        ) : (
-          <CardDoctor
-            doctors={doctors}
-            setStep={() => setStep}
-            //   symptomForm={symptomForm}
-          />
-        ))}
+      {/* STEP 2 – Doctor List */}
+      {step == 2 && (
+        <div className="space-y-4">
+          <button
+            onClick={() => setStep(1)}
+            className="btn btn-link btn-neutral p-0"
+          >
+            {"<"} Go Back
+          </button>
+          <div>
+            <h2 className="text-xl font-semibold">
+              Doctors Available for Consultation
+            </h2>
+            <p className="text-base-content/70">
+              Based on your symptoms, the following doctors are recommended:
+            </p>
+          </div>
+
+          {loadingDoctors ? (
+            <LoadingScreen />
+          ) : (
+            <CardDoctor doctors={doctors} setStep={setStep} />
+          )}
+        </div>
+      )}
     </div>
   );
 };

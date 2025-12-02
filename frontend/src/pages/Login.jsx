@@ -66,9 +66,11 @@ const Login = () => {
         password: form.password,
       });
       const { token, user, message } = res.data;
-      actionLogin({ token: token, user: user });
+      actionLogin({ token: token });
+      // actionLogin({ token: token, user: user });
       clearForm();
       toast.success(message);
+
       if (user?.role == user_role.a) {
         navigate("/admin");
       } else if (user?.role == user_role.d) {

@@ -1,13 +1,36 @@
-import React from "react";
+import React, { useState } from "react";
 import useAuthStore from "../../store/auth";
 import { user_role } from "../../constant/enum";
 import { useNavigate } from "react-router-dom";
 import { LogOut, User, User2 } from "lucide-react";
-import userRoundImage from "../../assets/img/user-round.png";
+import { HandleDoctorStatus } from "../../api/doctor";
+import { toast } from "sonner";
 
 const Navbar = ({ toggleDrawer = null, toggleTheme, theme }) => {
-  const { user, actionLogout } = useAuthStore();
+  const { token, user, actionLogout, actionDoctorStatus } = useAuthStore();
   const navigate = useNavigate();
+  const [status, setStatus] = useState(user?.doctor_profile?.status || 0);
+  const [loadingStatus, setLoadingStatus] = useState(false);
+
+  const handleStatusChange = async () => {
+    const newStatus = status == 0 ? 1 : 0;
+    setStatus(newStatus);
+    setLoadingStatus(true);
+
+    try {
+      const { data } = await HandleDoctorStatus(token, newStatus);
+
+      actionDoctorStatus(newStatus);
+      toast(data?.message);
+    } catch (err) {
+      console.error(err);
+      setStatus(!newStatus);
+      toast.error("Failed to update status");
+    } finally {
+      setTimeout(() => setLoadingStatus(false), 500);
+    }
+  };
+
   return (
     <div className="navbar bg-base-100 border-b border-base-300 shadow-md fixed top-0 left-0 right-0 z-50">
       <div className="flex-none lg:hidden">
@@ -96,12 +119,25 @@ const Navbar = ({ toggleDrawer = null, toggleTheme, theme }) => {
               <div className="w-full border-b border-base-300 mb-2 py-1 px-2.5">
                 <h1 className="font-semibold truncate">{user?.name}</h1>
                 <h1 className="font-semibold truncate">{user?.email}</h1>
+                {user?.role == user_role.d && (
+                  <div className="inline-flex gap-2 mt-0.5 font-semibold">
+                    Status:
+                    <input
+                      type="checkbox"
+                      disabled={loadingStatus}
+                      checked={status}
+                      onChange={handleStatusChange}
+                      className="toggle toggle-success"
+                    />
+                  </div>
+                )}
               </div>
               <li>
                 <a className="inline-flex" onClick={() => navigate("/profile")}>
                   <User2 className="w-4 h-4 " /> Profile
                 </a>
               </li>
+
               <li>
                 <a className="inline-flex" onClick={actionLogout}>
                   <LogOut className="w-4 h-4 " />
