@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/auth";
 import { Current } from "../api/auth";
 
@@ -9,7 +9,7 @@ const ProtectedRoute = ({
   //   requiredPermissions = [],
   children,
 }) => {
-  const { token, actionLogout } = useAuthStore();
+  const { token, actionLogout, actionUser } = useAuthStore();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -18,6 +18,7 @@ const ProtectedRoute = ({
         .then((res) => {
           const currentUser = res?.data;
           if (!currentUser) return navigate("/");
+          actionUser({ user: currentUser });
           const platformRoleCheck =
             allowedPlatformRoles.length == 0 ||
             allowedPlatformRoles.includes(currentUser.role);

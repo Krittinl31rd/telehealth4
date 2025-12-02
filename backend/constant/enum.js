@@ -46,6 +46,8 @@ const ws_cmd = {
   login: 1,
 
   measurement_result: 10,
+
+  doctor_status: 100,
 };
 
 module.exports = { measurement_types, sectionList, user_role, ws_cmd };

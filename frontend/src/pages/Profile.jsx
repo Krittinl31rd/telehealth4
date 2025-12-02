@@ -72,11 +72,8 @@ const Profile = () => {
 
     try {
       const res = await UpdateProfile(token, form);
-
-      toast.success("Profile updated");
-      console.log("Success:", res.data);
+      toast.success(res?.data?.message);
     } catch (err) {
-      console.log("Upload error:", err);
       toast.error("Update failed");
     } finally {
       setLoadingTypes(false);

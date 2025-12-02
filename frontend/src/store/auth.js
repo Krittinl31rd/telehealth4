@@ -6,10 +6,9 @@ const store = (set) => ({
   user: null,
   isInitialized: false,
 
-  actionLogin: ({ token, user }) =>
+  actionLogin: ({ token }) =>
     set({
       token,
-      user,
       isInitialized: true,
     }),
 
@@ -19,6 +18,22 @@ const store = (set) => ({
       user: null,
       isInitialized: false,
     }),
+
+  actionUser: ({ user }) =>
+    set({
+      user,
+    }),
+
+  actionDoctorStatus: ({ status }) =>
+    set((state) => ({
+      user: {
+        ...state.user,
+        doctor_profile: {
+          ...state.user?.doctor_profile,
+          status: status,
+        },
+      },
+    })),
 });
 
 const usePersist = {

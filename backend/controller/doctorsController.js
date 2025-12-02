@@ -3,6 +3,7 @@ const runQuery = require("../helper/queryHelper");
 const {
   sendToClientID,
   broadcastToLogInClients,
+  getWsClients,
 } = require("../utils/wsClients");
 const {
   measurement_types,
@@ -10,6 +11,7 @@ const {
   ws_cmd,
   user_role,
 } = require("../constant/enum");
+const { setDoctorStatus } = require("../cache/doctors");
 
 exports.GetDoctors = async (req, res) => {
   try {
@@ -37,6 +39,37 @@ exports.GetDoctors = async (req, res) => {
       QueryTypes.SELECT
     );
     return res.status(200).json(resp);
+  } catch (err) {
+    console.log(err);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+exports.HandleStatus = async (req, res) => {
+  try {
+    const { id } = req.authUser;
+    const { status } = req.body;
+
+    await runQuery(
+      `UPDATE doctor SET status = :status WHERE doctor_id = :doctor_id`,
+      {
+        status,
+        doctor_id: id,
+      },
+      QueryTypes.UPDATE
+    );
+
+    setDoctorStatus(id);
+
+    const payload = {
+      cmd: ws_cmd.doctor_status,
+      params: { doctor_id: id, status },
+    };
+    await broadcastToLogInClients(payload);
+
+    return res.status(200).json({
+      message: `Change status to ${status == 0 ? "Offline" : "Online"}`,
+    });
   } catch (err) {
     console.log(err);
     return res.status(500).json({ message: "Internal Server Error" });
